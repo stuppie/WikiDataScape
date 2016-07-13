@@ -1,0 +1,6 @@
+#surefire
+#Thu Jun 30 16:28:01 PDT 2016
+maven.ext.class.path=/home/gstupp/.netbeans/8.1/maven-nblib/netbeans-eventspy.jar
+user.dir=/home/gstupp/eclipse/myapp
+localRepository=/home/gstupp/.m2/repository
+basedir=/home/gstupp/eclipse/myapp

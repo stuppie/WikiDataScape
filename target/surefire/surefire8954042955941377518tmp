@@ -1,0 +1,5 @@
+#surefire
+#Mon Jun 20 14:13:16 PDT 2016
+user.dir=/home/gstupp/eclipse/myapp
+localRepository=/home/gstupp/.m2/repository
+basedir=/home/gstupp/eclipse/myapp
