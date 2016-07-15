@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1468451379538
+Bnd-LastModified: 1468542954855
 Build-Jdk: 1.8.0_91
 Built-By: gstupp
 Bundle-Activator: org.cytoscape.myapp.internal.CyActivator
