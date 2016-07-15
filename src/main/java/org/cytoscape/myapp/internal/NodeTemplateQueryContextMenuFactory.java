@@ -1,31 +1,12 @@
 package org.cytoscape.myapp.internal;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
-import javax.swing.JOptionPane;
-import org.apache.commons.collections.MultiMap;
-import org.apache.commons.collections.map.MultiValueMap;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFormatter;
-import org.apache.jena.rdf.model.Literal;
 import org.cytoscape.application.CyApplicationManager;
 
 import org.cytoscape.application.swing.CyMenuItem;
@@ -37,20 +18,17 @@ import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableUtil;
-import org.cytoscape.session.CyNetworkNaming;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
-import org.cytoscape.work.Task;
-import org.cytoscape.work.TaskIterator;
 import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.TaskMonitor;
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.Statement;
 import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
-import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
 
-public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactory {
+/**
+ * This is the right click menu when clicking a node, populated with template queries
+ *
+ * @author gstupp
+ */
+public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMenuFactory {
 
     private CyNetworkView netView;
     private final CyNetworkManager cyNetworkManager;
@@ -68,7 +46,7 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
             + "PREFIX bd: <http://www.bigdata.com/rdf#>\n";
     private View<CyNode> nodeView;
 
-    public MyNodeViewContextMenuFactory(CyNetworkManager cyNetworkManager, CyNetworkFactory cyNetworkFactory,
+    public NodeTemplateQueryContextMenuFactory(CyNetworkManager cyNetworkManager, CyNetworkFactory cyNetworkFactory,
             TaskManager taskManager, CyApplicationManager applicationManager, CyEventHelper eventHelper) {
         this.cyNetworkManager = cyNetworkManager;
         this.cyNetworkFactory = cyNetworkFactory;
@@ -77,12 +55,11 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         this.eventHelper = eventHelper;
     }
 
-    
     @Override
     public CyMenuItem createMenuItem(CyNetworkView netView, View<CyNode> nodeView) {
         this.netView = netView;
         this.nodeView = nodeView;
-        
+
         JMenu root = new JMenu("Query");
 
         // determine which right click menu to show based on selected items (protein? drug?)
@@ -118,64 +95,64 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
                 clicked(e, "bioProcess");
             });
             sub.add(menuItem);
-            
+
             JMenuItem menuItem3 = new JMenuItem("Get Products");
             menuItem3.addActionListener((ActionEvent e) -> {
                 clicked(e, "productFromProtein");
             });
             sub.add(menuItem3);
-            
+
             JMenuItem menuItem4 = new JMenuItem("Get Protein Domains");
             menuItem4.addActionListener((ActionEvent e) -> {
                 clicked(e, "domainFromProtein");
             });
             sub.add(menuItem4);
-            
+
             menuItem = new JMenuItem("Get Genes");
             menuItem.addActionListener((ActionEvent e) -> {
                 clicked(e, "geneFromProtein");
             });
             sub.add(menuItem);
         }
-        
+
         if (types.contains("gene")) {
             JMenu sub = new JMenu("Gene");
             root.add(sub);
-            
+
             JMenuItem menuItem = new JMenuItem("Get Proteins");
             menuItem.addActionListener((ActionEvent e) -> {
                 clicked(e, "proteinFromGene");
             });
             sub.add(menuItem);
-            
+
             menuItem = new JMenuItem("Get Orthologs");
             menuItem.addActionListener((ActionEvent e) -> {
                 clicked(e, "orthologFromGene");
             });
             sub.add(menuItem);
         }
-        
+
         if (types.contains("compound")) {
             JMenu sub = new JMenu("compound");
             root.add(sub);
-            
+
             JMenuItem menuItem = new JMenuItem("Get Proteins");
             menuItem.addActionListener((ActionEvent e) -> {
                 clicked(e, "proteinFromCompound");
             });
             sub.add(menuItem);
-            
+
         }
         if (types.contains("GO")) {
             JMenu sub = new JMenu("GO Term");
             root.add(sub);
-            
+
             JMenuItem menuItem = new JMenuItem("Get Proteins");
             menuItem.addActionListener((ActionEvent e) -> {
                 clicked(e, "proteinFromGO");
             });
             sub.add(menuItem);
-            
+
             JMenuItem menuItem2 = new JMenuItem("Get GO Parents");
             menuItem2.addActionListener((ActionEvent e) -> {
                 clicked(e, "goParent");
@@ -185,7 +162,7 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         if (types.contains("domain")) {
             JMenu sub = new JMenu("Protein Domain");
             root.add(sub);
-            
+
             JMenuItem menuItem = new JMenuItem("Get proteins containing domain");
             menuItem.addActionListener((ActionEvent e) -> {
                 clicked(e, "proteinFromDomain");
@@ -196,7 +173,7 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         CyMenuItem cyMenuItem = new CyMenuItem(root, 0);
         return cyMenuItem;
     }
-    
+
     private void goParent(String IDs) {
         String queryString = prefix
                 + "SELECT ?item ?value ?valueLabel ?valueId WHERE {\n"
@@ -222,7 +199,7 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "protein");
     }
-        
+
     private void proteinFromCompound(String IDs) {
         String queryString = prefix
                 + "SELECT ?item ?value ?valueLabel ?valueId WHERE {\n"
@@ -234,7 +211,7 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "protein");
     }
-    
+
     private void productFromProtein(String IDs) {
         String queryString = prefix
                 + "SELECT ?item ?value ?valueLabel ?valueId WHERE {\n"
@@ -260,7 +237,7 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "GO");
     }
-    
+
     private void bioProcess(String IDs) {
         /* Get the biological process go terms of any items */
         String queryString = prefix
@@ -286,38 +263,38 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "GO");
     }
-    
+
     private void domainFromProtein(String IDs) {
-        String queryString = prefix + 
-            "SELECT ?item ?value ?valueLabel ?itemLabel ?valueId WHERE {\n" +
-            "  values ?item {%s}\n" +
-            "  ?item wdt:P527 ?value . #has part\n" +
-            "  ?value wdt:P279 wd:Q898273 . #subclass of protein domain\n" +
-            "  ?value wdt:P2926 ?valueId . \n" +
-            "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n" +
-            "}";
+        String queryString = prefix
+                + "SELECT ?item ?value ?valueLabel ?itemLabel ?valueId WHERE {\n"
+                + "  values ?item {%s}\n"
+                + "  ?item wdt:P527 ?value . #has part\n"
+                + "  ?value wdt:P279 wd:Q898273 . #subclass of protein domain\n"
+                + "  ?value wdt:P2926 ?valueId . \n"
+                + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
+                + "}";
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "domain");
     }
-    
+
     private void proteinFromDomain(String IDs) {
         // get all proteins containing this domain
-        String queryString = prefix + 
-            "SELECT ?item ?value ?valueLabel ?itemLabel ?valueId WHERE {\n" +
-            "  values ?item {%s}\n" +
-            "  ?value wdt:P527 ?item . #has part\n" +
-            "  ?value wdt:P352 ?valueId . \n" +
-            "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n" +
-            "}";
+        String queryString = prefix
+                + "SELECT ?item ?value ?valueLabel ?itemLabel ?valueId WHERE {\n"
+                + "  values ?item {%s}\n"
+                + "  ?value wdt:P527 ?item . #has part\n"
+                + "  ?value wdt:P352 ?valueId . \n"
+                + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
+                + "}";
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "protein");
     }
-    
+
     private void proteinFromGene(String IDs) {
         String queryString = prefix
                 + "SELECT ?item ?value ?valueLabel ?valueId WHERE {\n"
                 + "  ?item wdt:P688 ?value .\n"
-                + "  ?value wdt:P352 ?valueId .\n" 
+                + "  ?value wdt:P352 ?valueId .\n"
                 + "  values ?item {%s}\n"
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
@@ -336,7 +313,7 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "gene");
     }
-    
+
     private void geneFromProtein(String IDs) {
         String queryString = prefix
                 + "SELECT ?item ?value ?valueLabel ?valueId WHERE {\n"
@@ -348,38 +325,20 @@ public class MyNodeViewContextMenuFactory implements CyNodeViewContextMenuFactor
         queryString = String.format(queryString, IDs);
         doQuery(queryString, "gene");
     }
-            
 
     private void doQuery(String queryString, String type) {
-        System.out.println(queryString);
-        Map<Item, List<String>> valueProt = new HashMap<>();
-        Query query = QueryFactory.create(queryString);
-        QueryExecution qexec = QueryExecutionFactory.sparqlService("https://query.wikidata.org/sparql", queryString);
-        ResultSet results = qexec.execSelect();
-        //ResultSetFormatter.out(System.out, results, query);
-
-        while (results.hasNext()) {
-            QuerySolution statement = results.next();
-            System.out.println("statement: " + statement.toString());
-            String item = statement.getResource("item").toString().replaceFirst("http://www.wikidata.org/entity/", "");
-            String valueId = statement.getLiteral("valueId").getString();
-            String valueWdid = statement.getResource("value").toString().replaceFirst("http://www.wikidata.org/entity/", "");
-            String valueLabel = statement.getLiteral("valueLabel").getString();
-
-            Item gt = new Item(valueLabel, valueId, type, valueWdid);
-            if (!valueProt.containsKey(gt)) {
-                valueProt.put(gt, new ArrayList<String>());
-            }
-            valueProt.get(gt).add(item);
-        }
-        //System.out.println("goProt: " + valueProt);
-
-        TransformTaskFactory ttf = new TransformTaskFactory(cyNetworkManager, cyNetworkFactory, applicationManager, valueProt);
-        taskManager.execute(ttf.createTaskIterator());
+        // call the template query task
+        TemplateQueryTask templateQueryTask = new TemplateQueryTask(queryString, type);
+        taskManager.execute(templateQueryTask.createTaskIterator());
     }
 
     public void clicked(ActionEvent e, String kind) {
         System.out.println("----------------------");
+
+        // set node visual styles
+        SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask();
+        taskManager.execute(setVisualStyleTask.createTaskIterator());
+
         WikibaseDataFetcher wbdf = WikibaseDataFetcher.getWikidataDataFetcher();
 
         CyNetwork myNet = this.netView.getModel();
