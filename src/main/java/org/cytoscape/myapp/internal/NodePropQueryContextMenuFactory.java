@@ -2,6 +2,7 @@ package org.cytoscape.myapp.internal;
 
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -64,18 +65,15 @@ public class NodePropQueryContextMenuFactory implements CyNodeViewContextMenuFac
         CyNetwork myNet = this.netView.getModel();
         JMenu root = new JMenu("Properties");
         List<CyNode> nodes = CyTableUtil.getNodesInState(myNet, "selected", true);
-        if (nodes.size() > 1) {
-            // TODO: this --v
-            System.out.println("Only works on one selected node");
-            CyMenuItem cyMenuItem = new CyMenuItem(root, 0);
-            return cyMenuItem;
-        }
-        // populate the submenu with known properties for that node
+        
+        // populate the submenu with known properties for these nodes
         JMenuItem menuItem;
-        CyNode node = nodes.get(0);
-        Set<Property> nodeProps = CyActivator.getNodeProps(node);
-        System.out.println("nodeProps: "+ nodeProps);
-        for (Property prop : nodeProps) {
+        Set<Property> props = new HashSet<>();
+        for (CyNode node : nodes){
+             props.addAll(CyActivator.getNodeProps(node));
+        }
+        System.out.println("props: " + props);
+        for (Property prop : props) {
             menuItem = new JMenuItem(prop.getName());
             menuItem.addActionListener((ActionEvent e) -> {
                 clickedProp(prop.getID(), prop.getName());

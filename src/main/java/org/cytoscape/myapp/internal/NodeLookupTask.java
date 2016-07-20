@@ -144,9 +144,9 @@ public class NodeLookupTask extends AbstractTask {
             return "gene";
         if (props.contains("P685"))  //NCBI Taxonomy ID
             return "organism";
-        if (props.contains("P682") || props.contains("P681") || props.contains("P680"))
+        if (props.contains("P686"))  //Gene Ontology ID
             return "GO";
-        if (props.contains("P2926"))  //
+        if (props.contains("P2926")) //InterPro ID
             return "interpro";
         return "unknown";
     }
