@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1468542954855
+Bnd-LastModified: 1469053086883
 Build-Jdk: 1.8.0_91
 Built-By: gstupp
 Bundle-Activator: org.cytoscape.myapp.internal.CyActivator
@@ -13,7 +13,7 @@ Bundle-ClassPath: .,wdtk-dumpfiles-0.6.0.jar,wdtk-datamodel-0.6.0.jar,ja
  jena-base-3.1.0.jar,collection-0.6.jar,jena-shaded-guava-3.1.0.jar,json
  ld-java-0.7.0.jar,commons-io-2.4.jar,httpclient-cache-4.2.6.jar,libthri
  ft-0.9.2.jar,jcl-over-slf4j-1.7.20.jar,commons-csv-1.0.jar,commons-coll
- ections-3.2.1.jar
+ ections-3.2.1.jar,guava-18.0.jar
 Bundle-ManifestVersion: 2
 Bundle-Name: org.cytoscape.myapp.myapp
 Bundle-SymbolicName: org.cytoscape.myapp.myapp
@@ -52,7 +52,8 @@ Embedded-Artifacts: wdtk-dumpfiles-0.6.0.jar;g="org.wikidata.wdtk";a="wd
  e.thrift";a="libthrift";v="0.9.2",jcl-over-slf4j-1.7.20.jar;g="org.slf4
  j";a="jcl-over-slf4j";v="1.7.20",commons-csv-1.0.jar;g="org.apache.comm
  ons";a="commons-csv";v="1.0",commons-collections-3.2.1.jar;g="commons-c
- ollections";a="commons-collections";v="3.2.1"
+ ollections";a="commons-collections";v="3.2.1",guava-18.0.jar;g="com.goo
+ gle.guava";a="guava";v="18.0"
 Export-Package: org.cytoscape.myapp;version="1.0.0.SNAPSHOT"
 Import-Package: javax.annotation;resolution:=optional,javax.crypto;resol
  ution:=optional,javax.crypto.spec;resolution:=optional,javax.management
@@ -75,12 +76,13 @@ Import-Package: javax.annotation;resolution:=optional,javax.crypto;resol
  rsion="[3.4,4)",org.cytoscape.view.layout;resolution:=optional;version=
  "[3.4,4)",org.cytoscape.view.model;resolution:=optional;version="[3.4,4
  )",org.cytoscape.view.presentation.property;resolution:=optional;versio
- n="[3.4,4)",org.cytoscape.view.vizmap;resolution:=optional;version="[3.
- 4,4)",org.cytoscape.view.vizmap.mappings;resolution:=optional;version="
- [3.4,4)",org.cytoscape.work;resolution:=optional;version="[3.4,4)",org.
- ietf.jgss;resolution:=optional,org.osgi.framework;resolution:=optional;
- version="[1.5,2)",org.slf4j.impl;resolution:=optional,org.tukaani.xz;re
- solution:=optional,sun.io;resolution:=optional,sun.misc;resolution:=opt
- ional
+ n="[3.4,4)",org.cytoscape.view.presentation.property.values;resolution:
+ =optional;version="[3.4,4)",org.cytoscape.view.vizmap;resolution:=optio
+ nal;version="[3.4,4)",org.cytoscape.view.vizmap.mappings;resolution:=op
+ tional;version="[3.4,4)",org.cytoscape.work;resolution:=optional;versio
+ n="[3.4,4)",org.ietf.jgss;resolution:=optional,org.osgi.framework;resol
+ ution:=optional;version="[1.5,2)",org.slf4j.impl;resolution:=optional,o
+ rg.tukaani.xz;resolution:=optional,sun.io;resolution:=optional,sun.misc
+ ;resolution:=optional
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Tool: Bnd-2.3.0.201405100607

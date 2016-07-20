@@ -24,11 +24,13 @@ public class TemplateQueryTask extends AbstractTask {
 
     private String type;
     private String queryString;
+    private String interaction;
     private TaskManager taskManager;
 
-    public TemplateQueryTask(String queryString, String type) {
+    public TemplateQueryTask(String queryString, String type, String interaction) {
         this.queryString = queryString;
-        this.type = type;
+        this.type = type; // this is the type of the new nodes
+        this.interaction = interaction; // the name of the relationship that is formed
         System.out.println("TemplateQueryTask");
     }
 
@@ -37,11 +39,11 @@ public class TemplateQueryTask extends AbstractTask {
         System.out.println("running template query task");
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
         this.taskManager = adapter.getTaskManager();
-        doQuery(queryString, type);
+        doQuery(queryString, type, interaction);
         System.out.println("done template query task");
     }
 
-    private void doQuery(String queryString, String type) {
+    private void doQuery(String queryString, String type, String interaction) {
         System.out.println(queryString);
         Map<Item, List<String>> valueProt = new HashMap<>();
         Query query = QueryFactory.create(queryString);
@@ -65,12 +67,12 @@ public class TemplateQueryTask extends AbstractTask {
         }
         //System.out.println("goProt: " + valueProt);
 
-        TransformTask transformTask = new TransformTask(valueProt);
+        TransformTask transformTask = new TransformTask(valueProt, interaction);
         taskManager.execute(transformTask.createTaskIterator());
     }
 
     public TaskIterator createTaskIterator() {
         System.out.println("createTaskIterator");
-        return new TaskIterator(new TemplateQueryTask(queryString, type));
+        return new TaskIterator(new TemplateQueryTask(queryString, type, interaction));
     }
 }

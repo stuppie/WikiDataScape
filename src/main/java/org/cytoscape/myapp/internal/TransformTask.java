@@ -5,12 +5,14 @@
  */
 package org.cytoscape.myapp.internal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
@@ -20,6 +22,7 @@ import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 
 /**
@@ -34,12 +37,15 @@ public class TransformTask extends AbstractTask {
     private final CyNetworkView myView;
     private Map<String, CyNode> idMap = new HashMap<>();
     private Map<Item, List<String>> test;
+    private String interaction;
+    private TaskManager taskManager;
 
-    public TransformTask(Map<Item, List<String>> test) {
+    public TransformTask(Map<Item, List<String>> test, String interaction) {
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
         this.netMgr = adapter.getCyNetworkManager();
         this.applicationManager = adapter.getCyApplicationManager();
         this.test = test;
+        this.interaction = interaction;
         this.myView = this.applicationManager.getCurrentNetworkView();
         this.myNet = this.myView.getModel();
         System.out.println("TransformTask");
@@ -48,6 +54,8 @@ public class TransformTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         System.out.println("running transform task");
+        CyAppAdapter adapter = CyActivator.getCyAppAdapter();
+        this.taskManager = adapter.getTaskManager();
         if (myNet.getDefaultNodeTable().getColumn("id") == null) {
             myNet.getDefaultNodeTable().createColumn("id", String.class, true);
         }
@@ -68,7 +76,8 @@ public class TransformTask extends AbstractTask {
             nodeNameMap.put(ip, node);
         }
         System.out.println("nodeNameMap: " + nodeNameMap);
-
+        
+        List<CyNode> newNodes = new ArrayList<>();
         CyNode protNode;
         Iterator keys = this.test.keySet().iterator();
         while (keys.hasNext()) {
@@ -81,37 +90,48 @@ public class TransformTask extends AbstractTask {
                 goNode = nodeNameMap.get(go.getWdid());
             } else {
                 goNode = myNet.addNode();
+                newNodes.add(goNode);
                 myNet.getDefaultNodeTable().getRow(goNode.getSUID()).set("name", go.getName());
                 myNet.getDefaultNodeTable().getRow(goNode.getSUID()).set("wdid", go.getWdid());
                 myNet.getDefaultNodeTable().getRow(goNode.getSUID()).set("id", go.getId());
-                myNet.getDefaultNodeTable().getRow(goNode.getSUID()).set("type", go.getType());
+                myNet.getDefaultNodeTable().getRow(goNode.getSUID()).set("type", go.getType());               
             }
 
             for (String p : prot) {
                 protNode = nodeNameMap.get(p);
                 System.out.println("protNode: " + protNode);
                 System.out.println("goNode: " + goNode);
-                if (!myNet.containsEdge(nodeNameMap.get(p), goNode)) {
-                    myNet.addEdge(nodeNameMap.get(p), goNode, false);
+                if (!myNet.containsEdge(protNode, goNode)) {
+                    myNet.addEdge(protNode, goNode, false);
+                    List<CyEdge> connectingEdgeList = myNet.getConnectingEdgeList(protNode, goNode, CyEdge.Type.ANY);
+                    System.out.println("connectingEdgeList: " + connectingEdgeList);
+                    myNet.getDefaultEdgeTable().getRow(connectingEdgeList.get(0).getSUID()).set("interaction", interaction);
                 }
             }
         }
         netMgr.addNetwork(myNet);
+        // keep track of new nodes and run the lookup task on them
+        NodeLookupTask nodeLookupTask = new NodeLookupTask(newNodes);
+        taskManager.execute(nodeLookupTask.createTaskIterator());
     }
 
     public static void updateView(CyNetworkView view) {
         CyAppAdapter appAdapter = CyActivator.getCyAppAdapter();
+        
         CyLayoutAlgorithmManager alMan = appAdapter.getCyLayoutAlgorithmManager();
         CyLayoutAlgorithm algor = alMan.getDefaultLayout(); // default grid layout
         TaskIterator itr = algor.createTaskIterator(view, algor.createLayoutContext(), CyLayoutAlgorithm.ALL_NODE_VIEWS, null);
         appAdapter.getTaskManager().execute(itr);// We use the synchronous task manager otherwise the visual style and updateView() may occur before the view is relayed out:
+        
         SynchronousTaskManager<?> synTaskMan = appAdapter.getCyServiceRegistrar().getService(SynchronousTaskManager.class);
         synTaskMan.execute(itr);
+        
         view.updateView(); // update view layout part
         appAdapter.getVisualMappingManager().getVisualStyle(view).apply(view); // update view style part
+        
     }
 
     public TaskIterator createTaskIterator() {
-        return new TaskIterator(new TransformTask(test));
+        return new TaskIterator(new TransformTask(test, interaction));
     }
 }

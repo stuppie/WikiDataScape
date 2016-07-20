@@ -31,11 +31,7 @@ import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
 public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMenuFactory {
 
     private CyNetworkView netView;
-    private final CyNetworkManager cyNetworkManager;
-    private final CyNetworkFactory cyNetworkFactory;
     private final TaskManager taskManager;
-    private final CyApplicationManager applicationManager;
-    private final CyEventHelper eventHelper;
     String prefix = "PREFIX wd: <http://www.wikidata.org/entity/>\n"
             + "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n"
             + "PREFIX wikibase: <http://wikiba.se/ontology#>\n"
@@ -48,11 +44,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
 
     public NodeTemplateQueryContextMenuFactory(CyNetworkManager cyNetworkManager, CyNetworkFactory cyNetworkFactory,
             TaskManager taskManager, CyApplicationManager applicationManager, CyEventHelper eventHelper) {
-        this.cyNetworkManager = cyNetworkManager;
-        this.cyNetworkFactory = cyNetworkFactory;
         this.taskManager = taskManager;
-        this.applicationManager = applicationManager;
-        this.eventHelper = eventHelper;
     }
 
     @Override
@@ -111,6 +103,12 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
             menuItem = new JMenuItem("Get Genes");
             menuItem.addActionListener((ActionEvent e) -> {
                 clicked(e, "geneFromProtein");
+            });
+            sub.add(menuItem);
+            
+            menuItem = new JMenuItem("Get Taxon");
+            menuItem.addActionListener((ActionEvent e) -> {
+                clicked(e, "taxonFromProtein");
             });
             sub.add(menuItem);
         }
@@ -183,7 +181,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "GO");
+        doQuery(queryString, "GO", "parent");
     }
 
     private void proteinFromGO(String IDs) {
@@ -197,7 +195,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "protein");
+        doQuery(queryString, "protein", "has GO");
     }
 
     private void proteinFromCompound(String IDs) {
@@ -209,7 +207,19 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "protein");
+        doQuery(queryString, "protein", "product");
+    }
+    
+    private void taxonFromProtein(String IDs) {
+        String queryString = prefix
+                + "SELECT ?item ?value ?valueLabel ?valueId WHERE {\n"
+                + "  ?item wdt:P703 ?value .\n"
+                + "  ?value wdt:P685 ?valueId .\n"
+                + "  values ?item {%s}\n"
+                + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
+                + "}";
+        queryString = String.format(queryString, IDs);
+        doQuery(queryString, "organism", "found in");
     }
 
     private void productFromProtein(String IDs) {
@@ -221,7 +231,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "compound");
+        doQuery(queryString, "compound", "produced by");
 
     }
 
@@ -235,7 +245,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "GO");
+        doQuery(queryString, "GO", "has GO");
     }
 
     private void bioProcess(String IDs) {
@@ -248,7 +258,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "GO");
+        doQuery(queryString, "GO", "has GO");
     }
 
     private void molFunction(String IDs) {
@@ -261,7 +271,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "GO");
+        doQuery(queryString, "GO", "has GO");
     }
 
     private void domainFromProtein(String IDs) {
@@ -274,7 +284,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "domain");
+        doQuery(queryString, "domain", "part of");
     }
 
     private void proteinFromDomain(String IDs) {
@@ -287,7 +297,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "protein");
+        doQuery(queryString, "protein", "contains domain");
     }
 
     private void proteinFromGene(String IDs) {
@@ -299,7 +309,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "protein");
+        doQuery(queryString, "protein", "encodes");
     }
 
     private void orthologFromGene(String IDs) {
@@ -311,7 +321,7 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "gene");
+        doQuery(queryString, "gene", "ortholog");
     }
 
     private void geneFromProtein(String IDs) {
@@ -323,12 +333,12 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
         queryString = String.format(queryString, IDs);
-        doQuery(queryString, "gene");
+        doQuery(queryString, "gene", "encoded by");
     }
 
-    private void doQuery(String queryString, String type) {
+    private void doQuery(String queryString, String type, String interaction) {
         // call the template query task
-        TemplateQueryTask templateQueryTask = new TemplateQueryTask(queryString, type);
+        TemplateQueryTask templateQueryTask = new TemplateQueryTask(queryString, type, interaction);
         taskManager.execute(templateQueryTask.createTaskIterator());
     }
 
@@ -388,16 +398,11 @@ public class NodeTemplateQueryContextMenuFactory implements CyNodeViewContextMen
             case "proteinFromDomain":
                 proteinFromDomain(IDs);
                 break;
+            case "taxonFromProtein":
+                taxonFromProtein(IDs);
+                break;
             default:
                 System.out.println("bad");
         }
-
-        /*
-        Map<String, List<String>> offline = new HashMap<>();
-        offline.put("A", Arrays.asList("P24941", "P06493"));
-        offline.put("B", Arrays.asList("P24941", "P06493"));
-        offline.put("C", Arrays.asList("P06493"));
-        offline.put("D", Arrays.asList("P24941"));
-         */
     }
 }

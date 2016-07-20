@@ -2,6 +2,7 @@ package org.cytoscape.myapp.internal;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -26,8 +27,7 @@ import org.cytoscape.session.CyNetworkNaming;
 public class CyActivator extends AbstractCyActivator {
 
     private static CyAppAdapter appAdapter;
-    private static HashMap<CyNode, Set<String>> nodeProps = new HashMap<>(); //  a node and props for that node
-    private static HashMap<String, String> propProps = new HashMap<>(); // prop name to prop ID
+    private static HashMap<CyNode, Set<Property>> nodeProps = new HashMap<>(); //  a node and props for that node
 
     public CyActivator() {
         super();
@@ -60,8 +60,7 @@ public class CyActivator extends AbstractCyActivator {
         registerAllServices(bc, myNodeViewContextMenuFactory, myNodeViewContextMenuFactoryProps);
 
         // Right click menu (node). Lookup
-        CyNodeViewContextMenuFactory lookupNodeViewContextMenuFactory = new NodeLookupContextMenuFactory(cyNetworkManagerServiceRef,
-                cyNetworkFactoryServiceRef, taskManager, cyApplicationManager, eventHelper);
+        CyNodeViewContextMenuFactory lookupNodeViewContextMenuFactory = new NodeLookupContextMenuFactory();
         Properties lookupNodeViewContextMenuFactoryProps = new Properties();
         lookupNodeViewContextMenuFactoryProps.put("preferredMenu", "WikiData");
         lookupNodeViewContextMenuFactoryProps.setProperty("title", "wikidata title");
@@ -86,23 +85,14 @@ public class CyActivator extends AbstractCyActivator {
         return appAdapter;
     }
 
-    public static void setNodeProps(CyNode node, Map<String, String> props) {
-        Set<String> put = nodeProps.put(node, props.keySet());
-        // need to also store the prop label -> prop XXX mapping
-        for (String key : props.keySet()) {
-            propProps.putIfAbsent(key, props.get(key).replaceFirst("http://www.wikidata.org/prop/", "").replaceFirst("direct/", ""));
-        }
-        System.out.println("nodeProps: " + nodeProps);
-        System.out.println("propProps: " + propProps);
+    public static void setNodeProps(CyNode node, Set<Property> props) {
+        nodeProps.put(node, props);
     }
 
-    public static Set<String> getNodeProps(CyNode node) {
-        return nodeProps.getOrDefault(node, new HashSet<>());
+    public static Set<Property> getNodeProps(CyNode node) {
+        return nodeProps.getOrDefault(node, new HashSet<Property>());
     }
 
-    public static String getPropID(String prop) {
-        return propProps.get(prop);
-    }
 }
 
 /*

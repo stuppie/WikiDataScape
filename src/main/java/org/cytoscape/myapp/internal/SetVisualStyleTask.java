@@ -5,6 +5,7 @@ import java.awt.Paint;
 import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
@@ -42,6 +43,7 @@ public class SetVisualStyleTask extends AbstractTask {
 
             VisualStyle vs = visualStyleFactory.createVisualStyle(vmmServiceRef.getDefaultVisualStyle());
             vs.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.RED);
+            vs.setDefaultValue(BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.ARROW);
 
             DiscreteMapping<String, Paint> colorMapping = (DiscreteMapping<String, Paint>) vmfFactoryD.createVisualMappingFunction("type", String.class, BasicVisualLexicon.NODE_FILL_COLOR);
 
@@ -50,6 +52,7 @@ public class SetVisualStyleTask extends AbstractTask {
             colorMapping.putMapValue("compound", new Color(255, 153, 153));
             colorMapping.putMapValue("domain", new Color(255, 1, 153));
             colorMapping.putMapValue("gene", new Color(153, 1, 153));
+            colorMapping.putMapValue("organism", new Color(153, 153, 153));
             vs.addVisualMappingFunction(colorMapping);
 
             vmmServiceRef.addVisualStyle(vs);

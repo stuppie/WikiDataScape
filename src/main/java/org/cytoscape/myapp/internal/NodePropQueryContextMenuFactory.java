@@ -1,6 +1,7 @@
 package org.cytoscape.myapp.internal;
 
 import java.awt.event.ActionEvent;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -64,16 +65,20 @@ public class NodePropQueryContextMenuFactory implements CyNodeViewContextMenuFac
         JMenu root = new JMenu("Properties");
         List<CyNode> nodes = CyTableUtil.getNodesInState(myNet, "selected", true);
         if (nodes.size() > 1) {
+            // TODO: this --v
             System.out.println("Only works on one selected node");
+            CyMenuItem cyMenuItem = new CyMenuItem(root, 0);
+            return cyMenuItem;
         }
         // populate the submenu with known properties for that node
         JMenuItem menuItem;
         CyNode node = nodes.get(0);
-        Set<String> nodeProps = CyActivator.getNodeProps(node);
-        for (String nodeProp : nodeProps) {
-            menuItem = new JMenuItem(nodeProp);
+        Set<Property> nodeProps = CyActivator.getNodeProps(node);
+        System.out.println("nodeProps: "+ nodeProps);
+        for (Property prop : nodeProps) {
+            menuItem = new JMenuItem(prop.getName());
             menuItem.addActionListener((ActionEvent e) -> {
-                clickedProp(nodeProp);
+                clickedProp(prop.getID(), prop.getName());
             });
             root.add(menuItem);
         }
@@ -81,7 +86,7 @@ public class NodePropQueryContextMenuFactory implements CyNodeViewContextMenuFac
         return cyMenuItem;
     }
 
-    private void clickedProp(String nodeProp) {
+    private void clickedProp(String nodePropId, String interaction) {
         System.out.println("----------------------");
 
         // set node visual styles
@@ -106,9 +111,9 @@ public class NodePropQueryContextMenuFactory implements CyNodeViewContextMenuFac
                 + "  values ?item {%s}\n"
                 + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
                 + "}";
-        queryString = String.format(queryString, CyActivator.getPropID(nodeProp), IDs);
+        queryString = String.format(queryString, nodePropId, IDs);
 
-        PropQueryTask propQueryTask = new PropQueryTask(queryString);
+        PropQueryTask propQueryTask = new PropQueryTask(queryString, interaction);
         taskManager.execute(propQueryTask.createTaskIterator());
     }
 }
