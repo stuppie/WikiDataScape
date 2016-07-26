@@ -1,32 +1,14 @@
 package org.cytoscape.myapp.internal;
 
 import java.awt.event.ActionEvent;
+import java.util.List;
+import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.application.CyApplicationManager;
-import org.cytoscape.model.CyNode;
-import org.cytoscape.model.CyEdge;
-import org.cytoscape.model.CyNetwork;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import java.io.IOException;
-import java.math.BigDecimal;
-
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocumentProcessor;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemIdValue;
-import org.wikidata.wdtk.datamodel.interfaces.MonolingualTextValue;
-import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
-import org.wikidata.wdtk.datamodel.interfaces.QuantityValue;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Map.Entry;
 import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.work.TaskManager;
 
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
-import org.wikidata.wdtk.wikibaseapi.WikibaseDataFetcher;
-import org.wikidata.wdtk.wikibaseapi.apierrors.MediaWikiApiErrorException;
 
 /**
  * Creates a new menu item under Apps menu section.
@@ -36,12 +18,16 @@ public class MenuAction extends AbstractCyAction {
 
     private final CyApplicationManager applicationManager;
     private final CyNetworkManager cyNetworkManager;
+    private final TaskManager taskManager;
 
     public MenuAction(final CyApplicationManager applicationManager, CyNetworkManager cyNetworkManager, final String menuTitle) {
         super(menuTitle, applicationManager, null, null);
         this.applicationManager = applicationManager;
         this.cyNetworkManager = cyNetworkManager;
         setPreferredMenu("Apps");
+        
+        CyAppAdapter adapter = CyActivator.getCyAppAdapter();
+        this.taskManager = adapter.getTaskManager();
     }
     public void actionPerformed(ActionEvent e) {
 
@@ -49,16 +35,20 @@ public class MenuAction extends AbstractCyAction {
         if (currentNetworkView == null) {
             return;
         }
-
-        // View is always associated with its model.
-        final CyNetwork network = currentNetworkView.getModel();
-        for (CyNode node : network.getNodeList()) {
-
-            if (network.getNeighborList(node, CyEdge.Type.ANY).isEmpty()) {
-                currentNetworkView.getNodeView(node).setVisualProperty(BasicVisualLexicon.NODE_VISIBLE, false);
-            }
+        IdLookupDialog x = new IdLookupDialog();
+        if (x.getResult()==0){
+            System.out.println(x.getIds());
+            System.out.println(x.getDb());
+            String[] ids = x.getIds().split("\n");
+            String db = x.getDb();
+            
+            IdLookupTask idLookupTask = new IdLookupTask(ids, db);
+            taskManager.execute(idLookupTask.createTaskIterator());
+        
         }
-        currentNetworkView.updateView();
+
+
+        //currentNetworkView.updateView();
     }
 
 }
