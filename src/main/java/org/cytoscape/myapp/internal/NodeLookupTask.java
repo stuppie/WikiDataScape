@@ -52,7 +52,6 @@ public class NodeLookupTask extends AbstractTask {
             + "PREFIX pq: <http://www.wikidata.org/prop/qualifier/>\n"
             + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
             + "PREFIX bd: <http://www.bigdata.com/rdf#>\n";
-    private final CyNode node;
 
     public NodeLookupTask(List<CyNode> nodes) {
         this.queryString = queryString;
@@ -62,9 +61,6 @@ public class NodeLookupTask extends AbstractTask {
         this.myView = this.applicationManager.getCurrentNetworkView();
         this.myNet = this.myView.getModel();
         this.nodes = nodes;
-        
-        // TODO: remove this
-        this.node = nodes.get(0);
     }
 
     @Override
