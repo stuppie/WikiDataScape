@@ -69,6 +69,10 @@ public class IdLookupTask extends AbstractTask {
         idWdid = HashBiMap.create();
         wdid2label = new HashMap<>();
         idString = "\"" + String.join("\" \"", ids) + "\"";
+        
+        CyTable nodeTable = myNet.getDefaultNodeTable();
+        if (nodeTable.getColumn("wdid") == null)
+            nodeTable.createColumn("wdid", String.class, true);
     }
 
     @Override
