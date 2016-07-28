@@ -104,8 +104,16 @@ public class TransformTask extends AbstractTask {
                 if (!myNet.containsEdge(protNode, goNode)) {
                     myNet.addEdge(protNode, goNode, false);
                     List<CyEdge> connectingEdgeList = myNet.getConnectingEdgeList(protNode, goNode, CyEdge.Type.ANY);
-                    System.out.println("connectingEdgeList: " + connectingEdgeList);
+                    if (connectingEdgeList.size() != 1){
+                        // TODO: This'll fail if we have more than one edge connecting two nodes
+                        System.out.println("more than one edge connecting two nodes");
+                    }
                     myNet.getDefaultEdgeTable().getRow(connectingEdgeList.get(0).getSUID()).set("interaction", interaction);
+                    // Name the edge
+                    String node1 = myNet.getDefaultNodeTable().getRow(protNode.getSUID()).get("name", String.class);
+                    String node2 = myNet.getDefaultNodeTable().getRow(goNode.getSUID()).get("name", String.class);
+                    String edgeName = node1 + " <-> " + node2;
+                    myNet.getDefaultEdgeTable().getRow(connectingEdgeList.get(0).getSUID()).set("name", edgeName);
                 }
             }
         }

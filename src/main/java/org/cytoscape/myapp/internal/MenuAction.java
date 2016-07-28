@@ -12,7 +12,7 @@ import org.cytoscape.work.TaskManager;
 
 /**
  * Creates a new menu item under Apps menu section.
- *
+ * When clicking this, you get a box allowing you to create nodes from a list of identifiers
  */
 public class MenuAction extends AbstractCyAction {
 

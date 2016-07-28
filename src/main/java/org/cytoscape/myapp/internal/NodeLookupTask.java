@@ -28,6 +28,7 @@ import org.cytoscape.work.TaskMonitor;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import java.util.stream.Collectors;
+import org.apache.jena.rdf.model.Resource;
 
 /**
  *
@@ -51,7 +52,8 @@ public class NodeLookupTask extends AbstractTask {
             + "PREFIX ps: <http://www.wikidata.org/prop/statement/>\n"
             + "PREFIX pq: <http://www.wikidata.org/prop/qualifier/>\n"
             + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n"
-            + "PREFIX bd: <http://www.bigdata.com/rdf#>\n";
+            + "PREFIX bd: <http://www.bigdata.com/rdf#>\n"
+            + "PREFIX hint: <http://www.bigdata.com/queryHints#>\n";
 
     public NodeLookupTask(List<CyNode> nodes) {
         this.queryString = queryString;
@@ -86,15 +88,16 @@ public class NodeLookupTask extends AbstractTask {
     private void doQuery(String IDs){
         // Get all properties for all selected nodes
         
+        // String.format("  values ?item {%s}\n", IDs) +
         String queryString = prefix + 
-                "# Get all properties \n" +
-                "SELECT distinct ?item ?prop ?propertyLabel ?vals WHERE {\n" +
+                "SELECT distinct ?item ?prop ?propLabel ?vals (datatype (?vals) AS ?type) WHERE {\n" +
+                "  hint:Query hint:optimizer \"None\" .\n" +
                 String.format("  values ?item {%s}\n", IDs) +
-                "  ?item ?prop ?vals . FILTER (!(SUBSTR(str(?vals), 1, 41) = 'http://www.wikidata.org/entity/statement/')).\n" +
-                "  ?property ?ref ?prop .\n" +
-                "  ?property rdfs:label ?propertyLabel\n" +
+                "  ?item ?p ?vals .\n" +
+                "  ?prop wikibase:directClaim ?p .\n" +
                 "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n" +
                 "}";
+                
         System.out.println(queryString);
         Query query = QueryFactory.create(queryString);
         QueryExecution qexec = QueryExecutionFactory.sparqlService("https://query.wikidata.org/sparql", queryString);
@@ -102,21 +105,49 @@ public class NodeLookupTask extends AbstractTask {
         //ResultSetFormatter.out(System.out, results, query);
         
         Map<CyNode, Set<Property>> nodeProps = new HashMap<>();
+        Map<CyNode, Set<Property>> nodeIdProps = new HashMap<>();
         while (results.hasNext()) {
             QuerySolution statement = results.next();
-            String propLabel = statement.getLiteral("propertyLabel").getString();
-            String prop = statement.getResource("prop").toString().replaceFirst("http://www.wikidata.org/prop/direct/", "");
-            String valueWdid = statement.getResource("item").toString().replaceFirst("http://www.wikidata.org/entity/", "");
+            String propLabel = statement.getLiteral("propLabel").getString();
+            String prop = statement.getResource("prop").getLocalName();
+            String valueWdid = statement.getResource("item").getLocalName();
+            Resource typeResource = statement.getResource("type");
+            
             CyNode thisNode = this.nodeWdid.inverse().get(valueWdid);
-            if (!nodeProps.containsKey(thisNode))
-                nodeProps.put(thisNode, new HashSet<>());
-            nodeProps.get(thisNode).add(new Property(propLabel, prop));
+            if (typeResource != null){
+                if ("string".equals(typeResource.getLocalName())){
+                    // This is an ID property. Add it to the table, don't add it to the right-click menu
+                    // TODO: Add to node table
+                    // System.out.println("string statement: " + statement);
+                    String value = statement.getLiteral("vals").getString();
+                    updateNodeTable(thisNode, propLabel, value);
+                    
+                    if (!nodeIdProps.containsKey(thisNode))
+                        nodeIdProps.put(thisNode, new HashSet<>());
+                    nodeIdProps.get(thisNode).add(new Property(propLabel, prop));
+                } else {
+                    // ignore it (example: http://www.wikidata.org/entity/P1121)
+                }
+            } else {
+                // The property may still not be wikidata item
+                // example http://www.wikidata.org/entity/P117
+                // System.out.println("prop statement: " + statement);
+                String valNameSpace = statement.getResource("vals").getNameSpace();
+                if ("http://www.wikidata.org/entity/".equals(valNameSpace)){
+                    // This property links to a wikidata item. Add it to the right-click menu
+                    // Todo: keep a count of the number of items it links to
+                    if (!nodeProps.containsKey(thisNode))
+                        nodeProps.put(thisNode, new HashSet<>());
+                    nodeProps.get(thisNode).add(new Property(propLabel, prop));
+                }
+            }
         }
         System.out.println("nodeProps: " + nodeProps);
         
+        // Set the node properties for each node and lookup the node's type based on them
         for (CyNode thisNode: nodeProps.keySet()){
             CyActivator.setNodeProps(thisNode, nodeProps.get(thisNode));
-            String type = propertiesToType(nodeProps.get(thisNode));
+            String type = propertiesToType(nodeIdProps.get(thisNode));
             myNet.getDefaultNodeTable().getRow(thisNode.getSUID()).set("type", type);
         }
     }
@@ -147,6 +178,13 @@ public class NodeLookupTask extends AbstractTask {
         return "unknown";
     }
     
+    private void updateNodeTable(CyNode node, String propLabel, String value){
+        // TODO: If there are multiple values, they will get overwritten
+        if (myNet.getDefaultNodeTable().getColumn(propLabel) == null)
+            myNet.getDefaultNodeTable().createColumn(propLabel, String.class, false);
+        
+        myNet.getDefaultNodeTable().getRow(node.getSUID()).set(propLabel, value);
+    }
     
 
     public TaskIterator createTaskIterator() {

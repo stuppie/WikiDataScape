@@ -1,8 +1,6 @@
 
 package org.cytoscape.myapp.internal;
 
-import javax.swing.Icon;
-
 /**
  * Represents a wikidata property
  * @author gstupp
