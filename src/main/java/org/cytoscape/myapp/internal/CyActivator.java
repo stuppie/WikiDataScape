@@ -73,7 +73,13 @@ public class CyActivator extends AbstractCyActivator {
         propNodeViewContextMenuFactoryProps.put("preferredMenu", "WikiData");
         propNodeViewContextMenuFactoryProps.setProperty("title", "wikidata title");
         registerAllServices(bc, propNodeViewContextMenuFactory, propNodeViewContextMenuFactoryProps);
-
+        
+        // Right click menu (node). Browse WikiData
+        BrowseContextMenu browseContextMenu = new BrowseContextMenu();
+        Properties browseContextMenuProps = new Properties();
+        browseContextMenuProps.put("preferredMenu", "WikiData");
+        registerAllServices(bc, browseContextMenu, browseContextMenuProps);
+        
         // set node visual styles
         SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask();
         taskManager.execute(setVisualStyleTask.createTaskIterator());
