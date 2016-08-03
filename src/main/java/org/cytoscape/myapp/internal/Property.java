@@ -24,7 +24,7 @@ public class Property {
     
     @Override
     public String toString() {
-        return "<name: '" + this.name + "', id: '" + this.id + ">";
+        return "<name: '" + this.name + "', id: '" + this.id + "'>";
     }
 
     @Override

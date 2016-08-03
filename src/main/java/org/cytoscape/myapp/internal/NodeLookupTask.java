@@ -159,6 +159,8 @@ public class NodeLookupTask extends AbstractTask {
         // Set the node properties for each node and lookup the node's type based on them
         for (CyNode thisNode : nodeProps.keySet()) {
             CyActivator.setNodeProps(thisNode, nodeProps.get(thisNode));
+        }
+        for (CyNode thisNode : nodeIdProps.keySet()) {
             String type = propertiesToType(nodeIdProps.get(thisNode));
             myNet.getDefaultNodeTable().getRow(thisNode.getSUID()).set("type", type);
         }
