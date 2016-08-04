@@ -29,6 +29,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.apache.jena.rdf.model.Resource;
 import org.cytoscape.model.CyRow;
@@ -90,7 +93,6 @@ public class NodeLookupTask extends AbstractTask {
 
     private void doQuery(String IDs) {
         // Get all properties for all selected nodes
-
         // http://tinyurl.com/h2ovsqj
         String queryString = prefix
                 + "SELECT distinct ?item ?itemLabel ?prop ?propLabel ?vals (datatype (?vals) AS ?type) WHERE {\n"
@@ -107,8 +109,11 @@ public class NodeLookupTask extends AbstractTask {
         ResultSet results = qexec.execSelect();
         //ResultSetFormatter.out(System.out, results, query);
 
-        Map<CyNode, Set<Property>> nodeProps = new HashMap<>();
+        // this is so I can get an element from a set (to update the property's count)
+        // http://stackoverflow.com/questions/7283338/getting-an-element-from-a-set
+        Map<CyNode, Map<Property, Property>> nodeProps = new HashMap<>();
         Map<CyNode, Set<Property>> nodeIdProps = new HashMap<>();
+        
         while (results.hasNext()) {
             QuerySolution statement = results.next();
             String propLabel = statement.getLiteral("propLabel").getString();
@@ -138,14 +143,17 @@ public class NodeLookupTask extends AbstractTask {
                 // System.out.println("prop statement: " + statement);
                 String valNameSpace = statement.getResource("vals").getNameSpace();
                 if ("http://www.wikidata.org/entity/".equals(valNameSpace)) {
-                    // This property links to a wikidata item. Add it to the right-click menu
-                    // Todo: keep a count of the number of items it links to
-                    if (!nodeProps.containsKey(thisNode)) {
-                        nodeProps.put(thisNode, new HashSet<>());
+                    // This property links to a wikidata item. Store it so we can add it to the right-click menu
+                    nodeProps.putIfAbsent(thisNode, new HashMap<>());
+                    Property p = new Property(propLabel, prop);
+                    if (nodeProps.get(thisNode).containsKey(p)){
+                        nodeProps.get(thisNode).get(p).incrementCount();
+                    } else {
+                        nodeProps.get(thisNode).put(p, p);
                     }
-                    nodeProps.get(thisNode).add(new Property(propLabel, prop));
                 }
             }
+            // TODO: This could be optimized
             myNet.getDefaultNodeTable().getRow(thisNode.getSUID()).set("name", itemLabel);
         }
         System.out.println("nodeProps: " + nodeProps);
@@ -158,7 +166,7 @@ public class NodeLookupTask extends AbstractTask {
 
         // Set the node properties for each node and lookup the node's type based on them
         for (CyNode thisNode : nodeProps.keySet()) {
-            CyActivator.setNodeProps(thisNode, nodeProps.get(thisNode));
+            CyActivator.setNodeProps(thisNode, new HashSet<>(nodeProps.get(thisNode).values()));
         }
         for (CyNode thisNode : nodeIdProps.keySet()) {
             String type = propertiesToType(nodeIdProps.get(thisNode));

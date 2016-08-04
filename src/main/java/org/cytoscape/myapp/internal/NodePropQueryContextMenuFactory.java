@@ -68,13 +68,22 @@ public class NodePropQueryContextMenuFactory implements CyNodeViewContextMenuFac
         
         // populate the submenu with known properties for these nodes
         JMenuItem menuItem;
-        Set<Property> props = new HashSet<>();
-        for (CyNode node : nodes){
-             props.addAll(CyActivator.getNodeProps(node));
+        Set<Property> props;
+        boolean withCount;
+        // If one node selected, add the number of related items to the property name
+        if (nodes.size() == 1){
+            CyNode node = nodes.get(0);
+            props = CyActivator.getNodeProps(node);
+            withCount = true;
+        }else {
+            props = new HashSet<>();
+            for (CyNode node : nodes)
+                 props.addAll(CyActivator.getNodeProps(node));
+            withCount = false;
         }
         System.out.println("props: " + props);
         for (Property prop : props) {
-            menuItem = new JMenuItem(prop.getName());
+            menuItem = new JMenuItem(prop.getName(withCount));
             menuItem.addActionListener((ActionEvent e) -> {
                 clickedProp(prop.getID(), prop.getName());
             });

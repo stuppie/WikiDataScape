@@ -9,10 +9,12 @@ public class Property {
 
     private String name = null; // ex: "KEGG ID"
     private String id = null; // ex: "P665"
+    private Integer count = null; // the number of items this property links to
 
     public Property(String name, String id) {
         this.name = name;
         this.id = id;
+        this.count = 1;
     }
     
     public String getID(){
@@ -21,10 +23,23 @@ public class Property {
     public String getName() {
         return this.name;
     }
+    public String getName(boolean withCount) {
+        if (withCount)
+            return this.name + " (" + this.count + ")";
+        else
+            return this.name;
+    }
+    public Integer getCount() {
+        return this.count;
+    }
+    public void incrementCount(){
+        this.count += 1;
+    }
+    
     
     @Override
     public String toString() {
-        return "<name: '" + this.name + "', id: '" + this.id + "'>";
+        return "<" + this.name + " (" + this.id + "): " + this.count + ">";
     }
 
     @Override
