@@ -1,5 +1,7 @@
 package org.cytoscape.WikiDataScape.internal;
 
+import org.cytoscape.WikiDataScape.internal.model.Property;
+import org.cytoscape.WikiDataScape.internal.tasks.SetVisualStyleTask;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.cytoscape.WikiDataScape.internal.model.Triples;
 import org.cytoscape.app.CyAppAdapter;
 
 import org.cytoscape.application.CyApplicationManager;
@@ -33,6 +36,8 @@ public class CyActivator extends AbstractCyActivator {
     
     //  a node and if its done the "what links here" query
     public static HashMap<CyNode, Boolean> nodeDoneWhatLinks = new HashMap<>(); 
+    
+    public static Triples triples = new Triples();
 
     public CyActivator() {
         super();
@@ -56,14 +61,6 @@ public class CyActivator extends AbstractCyActivator {
         Properties properties = new Properties();
         registerAllServices(bc, action, properties);
 
-        // Right click menu (node). Query
-        CyNodeViewContextMenuFactory myNodeViewContextMenuFactory = new NodeTemplateQueryContextMenuFactory(cyNetworkManagerServiceRef,
-                cyNetworkFactoryServiceRef, taskManager, cyApplicationManager, eventHelper);
-        Properties myNodeViewContextMenuFactoryProps = new Properties();
-        myNodeViewContextMenuFactoryProps.put("preferredMenu", "WikiData");
-        myNodeViewContextMenuFactoryProps.setProperty("title", "wikidata title");
-        registerAllServices(bc, myNodeViewContextMenuFactory, myNodeViewContextMenuFactoryProps);
-
         // Right click menu (node). Lookup
         CyNodeViewContextMenuFactory lookupNodeViewContextMenuFactory = new NodeLookupContextMenuFactory();
         Properties lookupNodeViewContextMenuFactoryProps = new Properties();
@@ -81,8 +78,7 @@ public class CyActivator extends AbstractCyActivator {
         */
         
         // Right click menu (node). Props
-        CyNodeViewContextMenuFactory propNodeViewContextMenuFactory = new NodePropQueryContextMenuFactory(cyNetworkManagerServiceRef,
-                cyNetworkFactoryServiceRef, taskManager, cyApplicationManager, eventHelper);
+        CyNodeViewContextMenuFactory propNodeViewContextMenuFactory = new NodePropQueryContextMenuFactory(taskManager);
         Properties propNodeViewContextMenuFactoryProps = new Properties();
         propNodeViewContextMenuFactoryProps.put("preferredMenu", "WikiData");
         propNodeViewContextMenuFactoryProps.setProperty("title", "wikidata title");
@@ -90,8 +86,7 @@ public class CyActivator extends AbstractCyActivator {
         
         
         // Right click menu (node). Inverse Props
-        CyNodeViewContextMenuFactory propInverseNodeViewContextMenuFactory = new NodeInversePropQueryContextMenuFactory(cyNetworkManagerServiceRef,
-                cyNetworkFactoryServiceRef, taskManager, cyApplicationManager, eventHelper);
+        CyNodeViewContextMenuFactory propInverseNodeViewContextMenuFactory = new NodeInversePropQueryContextMenuFactory(taskManager);
         Properties propInverseNodeViewContextMenuFactoryProps = new Properties();
         propInverseNodeViewContextMenuFactoryProps.put("preferredMenu", "WikiData");
         propInverseNodeViewContextMenuFactoryProps.setProperty("title", "wikidata title");

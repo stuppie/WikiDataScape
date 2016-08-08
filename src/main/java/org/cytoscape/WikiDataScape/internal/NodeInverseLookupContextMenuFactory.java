@@ -1,5 +1,6 @@
 package org.cytoscape.WikiDataScape.internal;
 
+import org.cytoscape.WikiDataScape.internal.tasks.NodeLookupTask;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;

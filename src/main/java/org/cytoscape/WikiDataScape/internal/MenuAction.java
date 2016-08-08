@@ -1,5 +1,6 @@
 package org.cytoscape.WikiDataScape.internal;
 
+import org.cytoscape.WikiDataScape.internal.tasks.IdLookupTask;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import org.cytoscape.app.CyAppAdapter;
