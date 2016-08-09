@@ -1,4 +1,4 @@
-# CytoWikiData
+# WikiDataScape
 A WikiData explorer for Cytoscape
 
 
