@@ -151,7 +151,7 @@ public class NodeLookupTask extends AbstractTask {
                     Item object = new Item(valueLabel, statement.getResource("vals").getLocalName());
                     Property prop = new Property(propLabel, propId, "item");
                     Triple triple = new Triple(subject, prop, object);
-                    System.out.println("triple: " +triple);
+                    //System.out.println("triple: " +triple);
                     triples.addTriple(triple);
                 }
             }

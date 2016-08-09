@@ -98,12 +98,12 @@ public class PropQueryTask extends AbstractTask {
                 Item obj = new Item(valueLabel, valueWdid);
                 triples.addTriple(new Triple(subj, prop, obj));
             } catch (java.lang.ClassCastException classCastException) {
-                System.out.println("fghjkl;");
+                System.out.println("error. This shouldnt happen u39jfkjdsf93");
             }
         }
         System.out.println("triples: " + triples);
 
-        TransformTask_1 transformTask = new TransformTask_1(triples);
+        TransformTask transformTask = new TransformTask(triples);
         taskManager.execute(transformTask.createTaskIterator());
 
     }

@@ -12,7 +12,7 @@ import javax.swing.JMenu;
 import org.cytoscape.WikiDataScape.internal.model.Counter;
 import org.cytoscape.WikiDataScape.internal.model.Item;
 import org.cytoscape.WikiDataScape.internal.model.Triples;
-import org.cytoscape.WikiDataScape.internal.tasks.TransformTask_1;
+import org.cytoscape.WikiDataScape.internal.tasks.TransformTask;
 import org.cytoscape.application.CyApplicationManager;
 
 import org.cytoscape.application.swing.CyMenuItem;
@@ -96,7 +96,7 @@ public class NodeInversePropQueryContextMenuFactory implements CyNodeViewContext
         // We can do they query using our stored triples! Don't need to do another sparql query!
         Triples objectTriples = CyActivator.triples.getObjectTriples(objects);
         Triples triplesWithProperty = objectTriples.getTriplesWithProperty(prop);
-        TransformTask_1 transformTask = new TransformTask_1(triplesWithProperty);
+        TransformTask transformTask = new TransformTask(triplesWithProperty);
         taskManager.execute(transformTask.createTaskIterator());
     }
 

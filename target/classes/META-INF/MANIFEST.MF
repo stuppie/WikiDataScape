@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1470693222194
+Bnd-LastModified: 1470772832700
 Build-Jdk: 1.8.0_91
 Built-By: gstupp
 Bundle-Activator: org.cytoscape.WikiDataScape.internal.CyActivator
@@ -78,7 +78,7 @@ Import-Package: javax.annotation;resolution:=optional,javax.crypto;resol
  )",org.cytoscape.view.presentation.property;resolution:=optional;versio
  n="[3.4,4)",org.cytoscape.view.presentation.property.values;resolution:
  =optional;version="[3.4,4)",org.cytoscape.view.vizmap;resolution:=optio
- nal;version="[3.4,4)",org.cytoscape.view.vizmap.mappings;resolution:=op
+ nal;version="[3.4,4)",org.cytoscape.view.vizmap.gui.util;resolution:=op
  tional;version="[3.4,4)",org.cytoscape.work;resolution:=optional;versio
  n="[3.4,4)",org.ietf.jgss;resolution:=optional,org.osgi.framework;resol
  ution:=optional;version="[1.5,2)",org.slf4j.impl;resolution:=optional,o

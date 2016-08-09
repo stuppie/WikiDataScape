@@ -2,19 +2,32 @@ package org.cytoscape.WikiDataScape.internal.tasks;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.cytoscape.WikiDataScape.internal.CyActivator;
+import org.cytoscape.WikiDataScape.internal.RainbowColorMappingGenerator;
 import org.cytoscape.app.CyAppAdapter;
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
+import org.cytoscape.view.presentation.property.NullVisualProperty;
+import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.view.vizmap.gui.util.DiscreteMappingGenerator;
+import org.cytoscape.view.vizmap.gui.util.PropertySheetUtil;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
+import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 
 /**
@@ -34,28 +47,31 @@ public class SetVisualStyleTask extends AbstractTask {
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
         VisualMappingManager vmmServiceRef = adapter.getVisualMappingManager();
         VisualStyleFactory visualStyleFactory = adapter.getVisualStyleFactory();
-        VisualMappingFunctionFactory vmfFactoryD = adapter.getVisualMappingFunctionDiscreteFactory();
-
-        // TODO: I don't know how to get the current network view. This is just getting the first one.
-        // and now wont fail if there are no views
+        VisualMappingFunctionFactory vmfDiscreteFactory = adapter.getVisualMappingFunctionDiscreteFactory();
+        VisualMappingFunctionFactory vmfPassFactory = adapter.getVisualMappingFunctionPassthroughFactory();
+        
         CyNetworkViewManager cnvm = adapter.getCyNetworkViewManager();
-        if (cnvm.getNetworkViewSet().iterator().hasNext()) {
-            CyNetworkView netView = cnvm.getNetworkViewSet().iterator().next();
-
+        
+        for (CyNetworkView netView: cnvm.getNetworkViewSet()){
             VisualStyle vs = visualStyleFactory.createVisualStyle(vmmServiceRef.getDefaultVisualStyle());
+            
+            VisualMappingFunction<String, String> edgeLabel = vmfPassFactory.createVisualMappingFunction("interaction", String.class, BasicVisualLexicon.EDGE_LABEL);
+            vs.addVisualMappingFunction(edgeLabel);
+
+            VisualMappingFunction<String, Paint> nodeColor = vmfDiscreteFactory.createVisualMappingFunction("instance of", String.class, BasicVisualLexicon.NODE_FILL_COLOR);
+            
+            /* // can't figure this shit out
+            RainbowColorMappingGenerator g = new RainbowColorMappingGenerator();
+            CyNetwork myNet = netView.getModel();
+            CyTable nodeTable = myNet.getDefaultNodeTable();
+            Map generateMap = g.generateMap(new HashSet(nodeTable.getColumn("instance of").getValues(String.class)));
+            */
+            
+            vs.addVisualMappingFunction(nodeColor);
+            
             vs.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.RED);
             vs.setDefaultValue(BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.ARROW);
-
-            DiscreteMapping<String, Paint> colorMapping = (DiscreteMapping<String, Paint>) vmfFactoryD.createVisualMappingFunction("type", String.class, BasicVisualLexicon.NODE_FILL_COLOR);
-
-            colorMapping.putMapValue("protein", new Color(153, 153, 255));
-            colorMapping.putMapValue("GO", new Color(1, 255, 1));
-            colorMapping.putMapValue("compound", new Color(255, 153, 153));
-            colorMapping.putMapValue("domain", new Color(255, 1, 153));
-            colorMapping.putMapValue("gene", new Color(153, 1, 153));
-            colorMapping.putMapValue("organism", new Color(153, 153, 153));
-            vs.addVisualMappingFunction(colorMapping);
-
+            
             vmmServiceRef.addVisualStyle(vs);
             vmmServiceRef.setVisualStyle(vs, netView);
         }
