@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.stream.Collectors;
+import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Resource;
 import org.cytoscape.WikiDataScape.internal.CyActivator;
 import org.cytoscape.WikiDataScape.internal.model.Item;

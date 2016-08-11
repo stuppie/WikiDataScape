@@ -24,6 +24,7 @@ import org.cytoscape.work.TaskMonitor;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import java.util.Iterator;
+import org.apache.jena.query.ResultSetFormatter;
 import org.cytoscape.WikiDataScape.internal.CyActivator;
 
 /**
@@ -87,7 +88,9 @@ public class IdLookupTask extends AbstractTask {
                 + String.format("?item wdt:%s ?ids\n", db)
                 + "SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }}";
         System.out.println(queryString);
+        System.out.println("xerces can");
         Query query = QueryFactory.create(queryString);
+        System.out.println("suck my balls");
         QueryExecution qexec = QueryExecutionFactory.sparqlService("https://query.wikidata.org/sparql", queryString);
         ResultSet results = qexec.execSelect();
         //ResultSetFormatter.out(System.out, results, query);
