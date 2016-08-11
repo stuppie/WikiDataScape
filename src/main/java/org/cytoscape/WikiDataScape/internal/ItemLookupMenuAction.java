@@ -3,6 +3,8 @@ package org.cytoscape.WikiDataScape.internal;
 import org.cytoscape.WikiDataScape.internal.tasks.IdLookupTask;
 import java.awt.event.ActionEvent;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.application.CyApplicationManager;
@@ -25,11 +27,13 @@ public class ItemLookupMenuAction extends AbstractCyAction {
     private final CyApplicationManager applicationManager;
     private final CyNetworkManager cyNetworkManager;
     private final TaskManager taskManager;
+    private final Class dialog;
 
-    public ItemLookupMenuAction(final CyApplicationManager applicationManager, CyNetworkManager cyNetworkManager, final String menuTitle) {
+    public ItemLookupMenuAction(CyApplicationManager applicationManager, CyNetworkManager cyNetworkManager, String menuTitle, Class dialog) {
         super(menuTitle, applicationManager, null, null);
         this.applicationManager = applicationManager;
         this.cyNetworkManager = cyNetworkManager;
+        this.dialog = dialog;
         setPreferredMenu("Apps");
         
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
@@ -57,8 +61,13 @@ public class ItemLookupMenuAction extends AbstractCyAction {
         }
         
         
-        ItemLookupDialog itemLookupDialog = new ItemLookupDialog();
-        //currentNetworkView.updateView();
+        try {
+            dialog.newInstance();
+        } catch (InstantiationException ex) {
+            Logger.getLogger(ItemLookupMenuAction.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(ItemLookupMenuAction.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

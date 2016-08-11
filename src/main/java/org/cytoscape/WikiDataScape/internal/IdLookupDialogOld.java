@@ -10,7 +10,7 @@ import javax.swing.*;
  */
 //B7NR10
 //Q2S1V4
-public class IdLookupDialog {
+public class IdLookupDialogOld {
 
     JTextArea textArea;
     JComboBox petList;
@@ -18,7 +18,7 @@ public class IdLookupDialog {
     String[] dbs;
     Map<String, String> prop;
 
-    public IdLookupDialog() {
+    public IdLookupDialogOld() {
         // dbs = new String[] {"UniProt ID", "Entrez Gene ID"};
         prop = new HashMap<>();
         prop.put("UniProt ID", "P352");
@@ -49,7 +49,7 @@ public class IdLookupDialog {
     }
 
     public static void main(String[] args) {
-        IdLookupDialog x = new IdLookupDialog();
+        IdLookupDialogOld x = new IdLookupDialogOld();
         if (x.getResult() == 0) {
             System.out.println(x.getIds());
             System.out.println(x.getDb());

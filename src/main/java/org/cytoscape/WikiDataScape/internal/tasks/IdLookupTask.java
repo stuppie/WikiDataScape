@@ -88,9 +88,7 @@ public class IdLookupTask extends AbstractTask {
                 + String.format("?item wdt:%s ?ids\n", db)
                 + "SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }}";
         System.out.println(queryString);
-        System.out.println("xerces can");
-        Query query = QueryFactory.create(queryString);
-        System.out.println("suck my balls");
+        //Query query = QueryFactory.create(queryString);
         QueryExecution qexec = QueryExecutionFactory.sparqlService("https://query.wikidata.org/sparql", queryString);
         ResultSet results = qexec.execSelect();
         //ResultSetFormatter.out(System.out, results, query);

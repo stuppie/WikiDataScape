@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.cytoscape.WikiDataScape.internal.model.Triples;
 import org.cytoscape.WikiDataScape.internal.tasks.NodeLookupTask;
+import org.cytoscape.WikiDataScape.internal.ItemLookupDialog;
 import org.cytoscape.app.CyAppAdapter;
 
 import org.cytoscape.application.CyApplicationManager;
@@ -38,7 +39,7 @@ import org.cytoscape.work.SynchronousTaskManager;
 import org.cytoscape.work.TaskIterator;
 
 public class CyActivator extends AbstractCyActivator {
-
+    
     private static CyAppAdapter appAdapter;
     private static HashMap<CyNode, Set<Property>> nodeProps = new HashMap<>(); //  a node and props for that node
     private static HashMap<CyNode, Set<Property>> inverseNodeProps = new HashMap<>(); //  a node and inverse props for that node
@@ -48,6 +49,7 @@ public class CyActivator extends AbstractCyActivator {
 
     public static Triples triples = new Triples();
 
+   
     public CyActivator() {
         super();
     }
@@ -71,9 +73,12 @@ public class CyActivator extends AbstractCyActivator {
         registerAllServices(bc, action, properties);
 
         // Toolbar menu: item lookup
-        ItemLookupMenuAction itemLookupMenuAction = new ItemLookupMenuAction(cyApplicationManager, cyNetworkManagerServiceRef, "WikiData Item Search");
-        Properties ItemLookupMenuActionProperties = new Properties();
-        registerAllServices(bc, itemLookupMenuAction, ItemLookupMenuActionProperties);
+        ItemLookupMenuAction itemLookupMenuAction = new ItemLookupMenuAction(cyApplicationManager, cyNetworkManagerServiceRef, "WikiData Item Search", ItemLookupDialog.class);
+        registerAllServices(bc, itemLookupMenuAction, new Properties());
+        
+        // Toolbar menu: ID list lookup
+        ItemLookupMenuAction itemListLookupMenuAction = new ItemLookupMenuAction(cyApplicationManager, cyNetworkManagerServiceRef, "WikiData Items Lookup", ItemListLookupDialog.class);
+        registerAllServices(bc, itemListLookupMenuAction, new Properties());
 
         // Right click menu (node). Lookup
         CyNodeViewContextMenuFactory lookupNodeViewContextMenuFactory = new NodeLookupContextMenuFactory();

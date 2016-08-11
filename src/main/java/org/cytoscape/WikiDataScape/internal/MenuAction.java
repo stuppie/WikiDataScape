@@ -55,7 +55,7 @@ public class MenuAction extends AbstractCyAction {
                         
             System.out.println("newNetworkView: " + newNetworkView);
         }
-        IdLookupDialog x = new IdLookupDialog();
+        IdLookupDialogOld x = new IdLookupDialogOld();
         if (x.getResult()==0){
             System.out.println(x.getIds());
             System.out.println(x.getDb());
