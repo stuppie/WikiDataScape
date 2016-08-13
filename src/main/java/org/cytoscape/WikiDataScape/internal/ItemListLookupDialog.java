@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +21,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import javax.swing.*;
 import org.cytoscape.WikiDataScape.internal.tasks.IdLookupTask;
-import org.cytoscape.WikiDataScape.internal.tasks.NodeLookupTask;
 import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.work.TaskManager;
 
@@ -36,38 +34,37 @@ import org.cytoscape.work.TaskManager;
 //Q2S1V4
 // https://www.wikidata.org/w/api.php?action=wbsearchentities&search=uniprot&language=en&format=json&type=property
 // https://www.wikidata.org/w/api.php?action=wbgetentities&ids=P22|P25|P352&props=datatype
-public class ItemListLookupDialog {
+public class ItemListLookupDialog extends javax.swing.JFrame {
+
+    private javax.swing.JButton jButton1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JList<String> jList1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JTextField jTextField1;
 
     List<SearchResult> results = new ArrayList<>();
 
     public ItemListLookupDialog() {
+
+        initComponents();
+
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
         TaskManager taskManager = adapter.getTaskManager();
-
-        JFrame frame = new JFrame("Lookup Property");
-        JPanel myPanel = new JPanel();
-        JTextField textField = new JTextField(20);
-        textField.setMaximumSize(new Dimension(400, 200));
-        JList jList = new JList();
-        jList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        jList.setSize(100, 100);
-        JButton searchButton = new JButton("Create Nodes");
-        searchButton.setEnabled(false);
-
-        JTextArea textArea = new JTextArea(10, 20);
-        JScrollPane scrollPane = new JScrollPane(textArea);
 
         Action searchAction = new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String text = textField.getText();
+                String text = jTextField1.getText();
                 try {
                     results.clear();
                     doSearch(text);
                     String[] jListValues = results.stream().map(x -> x.toString()).collect(Collectors.toList()).toArray(new String[0]);
-                    jList.setListData(jListValues);
+                    jList1.setListData(jListValues);
                     if (!results.isEmpty()) {
-                        searchButton.setEnabled(true);
+                        jButton1.setEnabled(true);
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(ItemListLookupDialog.class.getName()).log(Level.SEVERE, null, ex);
@@ -79,36 +76,107 @@ public class ItemListLookupDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedIndex;
-                if (jList.getSelectedValue() == null) {
+                if (jList1.getSelectedValue() == null) {
                     selectedIndex = 0;
                 } else {
-                    selectedIndex = jList.getSelectedIndex();
+                    selectedIndex = jList1.getSelectedIndex();
                 }
                 SearchResult selectedProperty = results.get(selectedIndex);
 
-                IdLookupTask idLookupTask = new IdLookupTask(textArea.getText().split("\n"), selectedProperty.id);
+                IdLookupTask idLookupTask = new IdLookupTask(jTextArea1.getText().split("\n"), selectedProperty.id);
                 taskManager.execute(idLookupTask.createTaskIterator());
             }
         };
 
-        searchButton.addActionListener(search);
+        jButton1.addActionListener(search);
+        jTextField1.addActionListener(searchAction);
 
-        textField.addActionListener(searchAction);
-
-        myPanel.add(new JLabel("Input Item to Lookup"));
-        myPanel.add(textField);
-        myPanel.add(jList);
-        myPanel.add(searchButton);
-        myPanel.add(scrollPane);
-
-        frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.X_AXIS));
-        myPanel.setLayout(new BoxLayout(myPanel, BoxLayout.Y_AXIS));
-        frame.add(myPanel);
         // set up the jframe, then display it
-        frame.setPreferredSize(new Dimension(400, 600));
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        this.setLocationRelativeTo(null);
+        this.setVisible(true);
+    }
+
+    private void initComponents() {
+
+        jTextField1 = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jLabel2 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList<>();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("Search for External ID Property (ex: UniProt ID)");
+
+        jScrollPane1.setEnabled(false);
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setText("Enter a list of IDs to lookup");
+
+        jButton1.setText("Go!");
+
+        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = {};
+
+            public int getSize() {
+                return strings.length;
+            }
+
+            public String getElementAt(int i) {
+                return strings[i];
+            }
+        });
+        jScrollPane3.setViewportView(jList1);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jScrollPane3)
+                                .addGroup(layout.createSequentialGroup()
+                                        .addGap(0, 0, Short.MAX_VALUE)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 342, Short.MAX_VALUE)
+                                                .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jButton1))
+                                .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE))
+                        .addContainerGap())
+        );
+        layout.setVerticalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createSequentialGroup()
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap())
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(jButton1)
+                                        .addGap(128, 128, 128))))
+        );
+
+        pack();
     }
 
     private void doSearch(String text) throws MalformedURLException, IOException {
@@ -141,9 +209,9 @@ public class ItemListLookupDialog {
         }
         lookupType(searchResults);
     }
-    
+
     private void lookupType(Map<String, SearchResult> searchResults) throws MalformedURLException, IOException {
-        
+
         // Lookup types of each property
         String join = String.join("|", searchResults.keySet());
         String sURL = "https://www.wikidata.org/w/api.php?action=wbgetentities&ids=%s&props=datatype&format=json";
@@ -158,11 +226,11 @@ public class ItemListLookupDialog {
         JsonObject rootobj = root.getAsJsonObject(); //May be an array, may be an object. 
         Set<Map.Entry<String, JsonElement>> search = rootobj.get("entities").getAsJsonObject().entrySet();
         System.out.println(rootobj.get("entities").toString());
-        
+
         for (Map.Entry<String, JsonElement> s : search) {
             String propId = s.getKey();
             String datatype = s.getValue().getAsJsonObject().get("datatype").getAsString();
-            if (datatype.equals("external-id")){
+            if (datatype.equals("external-id")) {
                 results.add(searchResults.get(propId));
             }
         }

@@ -27,6 +27,7 @@ import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkFactory;
 import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.model.CyTable;
 import org.cytoscape.work.TaskManager;
 
 import org.cytoscape.service.util.CyServiceRegistrar;
@@ -67,17 +68,12 @@ public class CyActivator extends AbstractCyActivator {
         TaskManager taskManager = getService(bc, TaskManager.class);
         CyEventHelper eventHelper = getService(bc, CyEventHelper.class);
 
-        // Toolbar menu
-        MenuAction action = new MenuAction(cyApplicationManager, cyNetworkManagerServiceRef, "WikiData Lookup");
-        Properties properties = new Properties();
-        registerAllServices(bc, action, properties);
-
         // Toolbar menu: item lookup
         ItemLookupMenuAction itemLookupMenuAction = new ItemLookupMenuAction(cyApplicationManager, cyNetworkManagerServiceRef, "WikiData Item Search", ItemLookupDialog.class);
         registerAllServices(bc, itemLookupMenuAction, new Properties());
         
         // Toolbar menu: ID list lookup
-        ItemLookupMenuAction itemListLookupMenuAction = new ItemLookupMenuAction(cyApplicationManager, cyNetworkManagerServiceRef, "WikiData Items Lookup", ItemListLookupDialog.class);
+        ItemLookupMenuAction itemListLookupMenuAction = new ItemLookupMenuAction(cyApplicationManager, cyNetworkManagerServiceRef, "WikiData Multi-Item Lookup", ItemListLookupDialog.class);
         registerAllServices(bc, itemListLookupMenuAction, new Properties());
 
         // Right click menu (node). Lookup
@@ -114,7 +110,7 @@ public class CyActivator extends AbstractCyActivator {
         Properties browseContextMenuProps = new Properties();
         browseContextMenuProps.put("preferredMenu", "WikiData");
         registerAllServices(bc, browseContextMenu, browseContextMenuProps);
-
+        
         // set node visual styles
         SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask();
         taskManager.execute(setVisualStyleTask.createTaskIterator());
@@ -149,6 +145,9 @@ public class CyActivator extends AbstractCyActivator {
         CyNetworkView myView = applicationManager.getCurrentNetworkView();
         CyNetwork myNet = myView.getModel();
         CyNetworkManager cyNetworkManager = adapter.getCyNetworkManager();
+        CyTable nodeTable = myNet.getDefaultNodeTable();
+        if (nodeTable.getColumn("wdid") == null)
+            nodeTable.createColumn("wdid", String.class, true);
 
         List<CyNode> newNodes = new ArrayList<>();
 

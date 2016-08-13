@@ -77,6 +77,9 @@ public class TransformTask extends AbstractTask {
 
         makeNetwork();
         updateView(myView);
+        SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask();
+        taskManager.execute(setVisualStyleTask.createTaskIterator());
+
         System.out.println("done transform task");
     }
 
