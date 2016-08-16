@@ -63,12 +63,6 @@ public class TransformTask extends AbstractTask {
         if (myNet.getDefaultNodeTable().getColumn("id") == null) {
             myNet.getDefaultNodeTable().createColumn("id", String.class, true);
         }
-        if (myNet.getDefaultNodeTable().getColumn("instance of") == null) {
-            myNet.getDefaultNodeTable().createColumn("instance of", String.class, false);
-        }
-        if (myNet.getDefaultNodeTable().getColumn("subclass") == null) {
-            myNet.getDefaultNodeTable().createColumn("subclass", String.class, false);
-        }
         newNodes = new ArrayList<>();
         nodeWdidMap = new HashMap<>();
         List<CyNode> nodeList = myNet.getNodeList();
@@ -80,7 +74,7 @@ public class TransformTask extends AbstractTask {
 
         makeNetwork();
         updateView(myView);
-        SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask();
+        SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask(myView);
         taskManager.execute(setVisualStyleTask.createTaskIterator());
 
         System.out.println("done transform task");

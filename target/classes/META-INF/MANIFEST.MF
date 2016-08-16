@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1471309197341
+Bnd-LastModified: 1471386392114
 Build-Jdk: 1.8.0_91
 Built-By: gstupp
 Bundle-Activator: org.cytoscape.WikiDataScape.internal.CyActivator
@@ -14,7 +14,7 @@ Bundle-ClassPath: .,wdtk-wikibaseapi-0.6.0.jar,wdtk-datamodel-0.6.0.jar,
  ommons-csv-1.0.jar,xercesImpl-2.11.0.jar,xml-apis-1.4.01.jar,commons-co
  llections-3.2.1.jar,guava-18.0.jar,gson-2.7.jar
 Bundle-ManifestVersion: 2
-Bundle-Name: org.cytoscape.WikiDataScape.WikiDataScape
+Bundle-Name: WikiDataScape
 Bundle-SymbolicName: org.cytoscape.WikiDataScape.WikiDataScape
 Bundle-Version: 1.0.3
 Created-By: Apache Maven Bundle Plugin
@@ -75,11 +75,12 @@ Import-Package: javax.annotation;resolution:=optional,javax.crypto;resol
  :=optional;version="[3.4,4)",org.cytoscape.view.presentation.property.v
  alues;resolution:=optional;version="[3.4,4)",org.cytoscape.view.vizmap;
  resolution:=optional;version="[3.4,4)",org.cytoscape.view.vizmap.gui.ut
- il;resolution:=optional;version="[3.4,4)",org.cytoscape.work;resolution
- :=optional;version="[3.4,4)",org.ietf.jgss;resolution:=optional,org.osg
- i.framework;resolution:=optional;version="[1.5,2)",org.slf4j;resolution
- :=optional;version="[1.7,2)",org.slf4j.spi;resolution:=optional;version
- ="[1.7,2)",org.tukaani.xz;resolution:=optional,sun.io;resolution:=optio
- nal,sun.misc;resolution:=optional
+ il;resolution:=optional;version="[3.4,4)",org.cytoscape.view.vizmap.map
+ pings;resolution:=optional;version="[3.4,4)",org.cytoscape.work;resolut
+ ion:=optional;version="[3.4,4)",org.ietf.jgss;resolution:=optional,org.
+ osgi.framework;resolution:=optional;version="[1.5,2)",org.slf4j;resolut
+ ion:=optional;version="[1.7,2)",org.slf4j.spi;resolution:=optional;vers
+ ion="[1.7,2)",org.tukaani.xz;resolution:=optional,sun.io;resolution:=op
+ tional,sun.misc;resolution:=optional
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Tool: Bnd-2.3.0.201405100607

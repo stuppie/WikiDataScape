@@ -39,15 +39,12 @@ import org.cytoscape.model.CyRow;
  */
 public class NodeLookupTask extends AbstractTask {
 
-    private String queryString;
-    private TaskManager taskManager;
-    private final CyNetworkManager netMgr;
     private final CyApplicationManager applicationManager;
     private final CyNetworkView myView;
     private final CyNetwork myNet;
     private final List<CyNode> nodes;
     private BiMap<CyNode, String> nodeWdid;
-    private boolean includeReverse;
+    private boolean doReverse;
 
     String prefix = "PREFIX wd: <http://www.wikidata.org/entity/>\n"
             + "PREFIX wdt: <http://www.wikidata.org/prop/direct/>\n"
@@ -60,10 +57,9 @@ public class NodeLookupTask extends AbstractTask {
             + "PREFIX hint: <http://www.bigdata.com/queryHints#>\n";
     
 
-    public NodeLookupTask(List<CyNode> nodes, boolean includeReverse) {
-        this.includeReverse = includeReverse;
+    public NodeLookupTask(List<CyNode> nodes, boolean doReverse) {
+        this.doReverse = doReverse;
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
-        this.netMgr = adapter.getCyNetworkManager();
         this.applicationManager = adapter.getCyApplicationManager();
         this.myView = this.applicationManager.getCurrentNetworkView();
         this.myNet = this.myView.getModel();
@@ -77,14 +73,13 @@ public class NodeLookupTask extends AbstractTask {
     @Override
     public void run(TaskMonitor taskMonitor) throws Exception {
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
-        this.taskManager = adapter.getTaskManager();
         
         // make the type column
         CyTable nodeTable = myNet.getDefaultNodeTable();
         if (nodeTable.getColumn("subclass of") == null) 
-            nodeTable.createColumn("subclass of", String.class, false);
+            nodeTable.createListColumn("subclass of", String.class, false);
         if (nodeTable.getColumn("instance of") == null) 
-            nodeTable.createColumn("instance of", String.class, false);
+            nodeTable.createListColumn("instance of", String.class, false);
         
 
         nodeWdid = HashBiMap.create();
@@ -94,11 +89,11 @@ public class NodeLookupTask extends AbstractTask {
         for (CyNode node : nodes) {
             String wdid = nodeTable.getRow(node.getSUID()).get("wdid", String.class);
             nodeWdid.put(node, wdid); // map ID to node
-            CyActivator.nodeDoneWhatLinks.put(node, this.includeReverse);
+            CyActivator.nodeDoneWhatLinks.put(node, this.doReverse);
         }
         System.out.println("nodeWdid" + nodeWdid);
 
-        doQuery(wdids, includeReverse);
+        doQuery(wdids, doReverse);
 
     }
 
@@ -229,56 +224,24 @@ public class NodeLookupTask extends AbstractTask {
     }
 
     private void updateNodeTable(CyNode node, String propLabel, String value) {
+        // Every "ID" column is a list column
         CyTable nodeTable = myNet.getDefaultNodeTable();
         if (nodeTable.getColumn(propLabel) == null) {
-            nodeTable.createColumn(propLabel, String.class, false);
+            nodeTable.createListColumn(propLabel, String.class, false);
         }
-
-        // If its not a list column, check if the column already has this value set.
-        if (nodeTable.getColumn(propLabel).getListElementType() == null) {
-            // column is not a list
-            String currVal = nodeTable.getRow(node.getSUID()).get(propLabel, String.class);
-            if (currVal == null) {
-                // column is empty
-                nodeTable.getRow(node.getSUID()).set(propLabel, value);
-            } else if (currVal.equals(value)) {
-                // trying to set same value. Do nothing
-            } else {
-                // change this to a list and append the new value
-                List<String> currValues = nodeTable.getColumn(propLabel).getValues(String.class);
-                System.out.println("currValues: " + currValues);
-                nodeTable.deleteColumn(propLabel);
-                nodeTable.createListColumn(propLabel, String.class, false);
-
-                // re set the values from the other rows
-                Iterator<String> iterator = currValues.iterator();
-                for (CyRow row : nodeTable.getAllRows()) {
-                    row.set(propLabel, new ArrayList<String>());
-                    String next = iterator.next();
-                    if (next != null) {
-                        row.getList(propLabel, String.class).add(next);
-                    }
-                }
-
-                CyRow thisRow = nodeTable.getRow(node.getSUID());
-                //thisRow.set(propLabel, new ArrayList<String>());
-                //thisRow.getList(propLabel, String.class).add(currVal);
-                thisRow.getList(propLabel, String.class).add(value);
-            }
-        } else {
-            // columns is already a list. Check if the new value is already in the list.
-            CyRow thisRow = nodeTable.getRow(node.getSUID());
-            if (thisRow.getList(propLabel, String.class) == null) {
-                thisRow.set(propLabel, new ArrayList<String>());
-            }
-            List<String> currList = thisRow.getList(propLabel, String.class);
-            if (!currList.contains(value)) {
-                thisRow.getList(propLabel, String.class).add(value);
-            }
+        //Check if the new value is already in the list.
+        CyRow thisRow = nodeTable.getRow(node.getSUID());
+        if (thisRow.getList(propLabel, String.class) == null) {
+            thisRow.set(propLabel, new ArrayList<String>());
+        }
+        List<String> currList = thisRow.getList(propLabel, String.class);
+        if (!currList.contains(value)) {
+            thisRow.getList(propLabel, String.class).add(value);
         }
     }
+    
 
     public TaskIterator createTaskIterator() {
-        return new TaskIterator(new NodeLookupTask(nodes, includeReverse));
+        return new TaskIterator(new NodeLookupTask(nodes, doReverse));
     }
 }

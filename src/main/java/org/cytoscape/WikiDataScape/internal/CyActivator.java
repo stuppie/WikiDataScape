@@ -112,8 +112,8 @@ public class CyActivator extends AbstractCyActivator {
         registerAllServices(bc, browseContextMenu, browseContextMenuProps);
         
         // set node visual styles
-        SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask();
-        taskManager.execute(setVisualStyleTask.createTaskIterator());
+        //SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask();
+        //taskManager.execute(setVisualStyleTask.createTaskIterator());
 
         System.out.println("Started Up");
     }

@@ -4,12 +4,13 @@
     <properties>
         <bundle.symbolicName>org.cytoscape.WikiDataScape.WikiDataScape</bundle.symbolicName>
         <bundle.namespace>org.cytoscape.WikiDataScape</bundle.namespace>
+        <bundle.name>WikiDataScape</bundle.name>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.WikiDataScape</groupId>
     <artifactId>WikiDataScape</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 
     <name>WikiDataScape</name>
     <packaging>bundle</packaging>

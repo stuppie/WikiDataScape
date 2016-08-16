@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.cytoscape.WikiDataScape.internal.tasks.SetVisualStyleTask;
 import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.application.swing.AbstractCyAction;
 import org.cytoscape.application.CyApplicationManager;
@@ -56,6 +57,9 @@ public class ItemLookupMenuAction extends AbstractCyAction {
             
             CyNetworkView newNetworkView = cyNetworkViewFactory.createNetworkView(newNetwork);
             cyNetworkViewManager.addNetworkView(newNetworkView, true);
+            
+            SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask(newNetworkView);
+            taskManager.execute(setVisualStyleTask.createTaskIterator());
                         
             System.out.println("newNetworkView: " + newNetworkView);
         }
