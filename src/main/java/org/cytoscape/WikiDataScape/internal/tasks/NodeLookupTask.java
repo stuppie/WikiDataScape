@@ -22,8 +22,6 @@ import org.cytoscape.work.TaskManager;
 import org.cytoscape.work.TaskMonitor;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import org.apache.jena.query.ResultSetFormatter;
@@ -83,9 +81,11 @@ public class NodeLookupTask extends AbstractTask {
         
         // make the type column
         CyTable nodeTable = myNet.getDefaultNodeTable();
-        if (nodeTable.getColumn("type") == null) {
-            nodeTable.createColumn("type", String.class, true);
-        }
+        if (nodeTable.getColumn("subclass of") == null) 
+            nodeTable.createColumn("subclass of", String.class, false);
+        if (nodeTable.getColumn("instance of") == null) 
+            nodeTable.createColumn("instance of", String.class, false);
+        
 
         nodeWdid = HashBiMap.create();
         
@@ -221,140 +221,12 @@ public class NodeLookupTask extends AbstractTask {
     
     
     
-    private void doQuery(Set<String> wdids, boolean includeReverse) {
-        
-        if (!includeReverse) {
+    private void doQuery(Set<String> wdids, boolean doReverse) {
+        if (!doReverse) {
             doQuery(wdids);
         } else
             doReverseQuery(wdids);
-        
-        /*
-
-
-                // TODO: This could be optimized
-                myNet.getDefaultNodeTable().getRow(thisNode.getSUID()).set("name", itemLabel);
-            } else {
-                // reverse prop
-                String thisNodeWdid = statement.getResource("vals").getLocalName();
-                CyNode thisNode = this.nodeWdid.inverse().get(thisNodeWdid);
-                inverseNodeProps.putIfAbsent(thisNode, new HashMap<>());
-                Property p = new Property(propLabel, propId, propType);
-                if (inverseNodeProps.get(thisNode).containsKey(p)) {
-                    inverseNodeProps.get(thisNode).get(p).incrementCount();
-                } else {
-                    inverseNodeProps.get(thisNode).put(p, p);
-                }
-            }
-        }
-        System.out.println("nodeProps: " + nodeProps);
-        System.out.println("inverseNodeProps: " + inverseNodeProps);
-        
-
-        // Set the node properties for each node and lookup the node's type based on them
-        for (CyNode thisNode : nodeProps.keySet()) {
-            Collection<Property> props = nodeProps.get(thisNode).values();
-
-            Set<Property> itemProps = props.stream().filter(p -> "item".equals(p.getType())).collect(Collectors.toSet());
-            CyActivator.setNodeProps(thisNode, itemProps);
-
-            Set<Property> idProps = props.stream().filter(p -> "id".equals(p.getType())).collect(Collectors.toSet());
-            String type = propertiesToType(idProps);
-            myNet.getDefaultNodeTable().getRow(thisNode.getSUID()).set("type", type);
-        }
-        
-        for (CyNode thisNode : inverseNodeProps.keySet()) {
-            Collection<Property> props = inverseNodeProps.get(thisNode).values();
-            CyActivator.setInverseNodeProps(thisNode, new HashSet<>(props));
-        }
-        */
-
     }
-/*
-    private void doQuery(Set<String> wdids) {
-
-        String IDs = String.join(" ", wdids.stream().map(wdid -> "wd:" + wdid).collect(Collectors.toSet()));
-
-        // Get all properties for all selected nodes
-        // http://tinyurl.com/h2ovsqj
-        String queryString = prefix
-                + "SELECT distinct ?item ?itemLabel ?prop ?propLabel ?vals (datatype (?vals) AS ?type) WHERE {\n"
-                + "  hint:Query hint:optimizer \"None\" .\n"
-                + String.format("  values ?item {%s}\n", IDs)
-                + "  ?item ?p ?vals .\n"
-                + "  ?prop wikibase:directClaim ?p .\n"
-                + "  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" }\n"
-                + "}";
-
-        System.out.println(queryString);
-        Query query = QueryFactory.create(queryString);
-        QueryExecution qexec = QueryExecutionFactory.sparqlService("https://query.wikidata.org/sparql", queryString);
-        ResultSet results = qexec.execSelect();
-        //ResultSetFormatter.out(System.out, results, query);
-
-        // this is so I can get an element from a set (to update the property's count)
-        // http://stackoverflow.com/questions/7283338/getting-an-element-from-a-set
-        Map<CyNode, Map<Property, Property>> nodeProps = new HashMap<>();
-
-        while (results.hasNext()) {
-            QuerySolution statement = results.next();
-            String propLabel = statement.getLiteral("propLabel").getString();
-            String itemLabel = statement.getLiteral("itemLabel").getString();
-            String prop = statement.getResource("prop").getLocalName();
-            String valueWdid = statement.getResource("item").getLocalName();
-            Resource typeResource = statement.getResource("type");
-
-            CyNode thisNode = this.nodeWdid.inverse().get(valueWdid);
-            String propType = null;
-
-            if (typeResource != null) {
-                if ("string".equals(typeResource.getLocalName())) {
-                    // This is an ID property. Add it to the table, don't add it to the right-click menu
-                    // System.out.println("string statement: " + statement);
-                    String value = statement.getLiteral("vals").getString();
-                    updateNodeTable(thisNode, propLabel, value);
-                    propType = "id";
-                } // else ignore it (example: http://www.wikidata.org/entity/P1121)
-            } else {
-                // The property may still not be wikidata item
-                // example http://www.wikidata.org/entity/P117
-                String valNameSpace = statement.getResource("vals").getNameSpace();
-                if ("http://www.wikidata.org/entity/".equals(valNameSpace)) {
-                    // This property links to a wikidata item. We'll add it to the right-click menu
-                    propType = "item";
-                }
-            }
-            nodeProps.putIfAbsent(thisNode, new HashMap<>());
-            Property p = new Property(propLabel, prop, propType);
-            if (nodeProps.get(thisNode).containsKey(p)) {
-                nodeProps.get(thisNode).get(p).incrementCount();
-            } else {
-                nodeProps.get(thisNode).put(p, p);
-            }
-
-            // TODO: This could be optimized
-            myNet.getDefaultNodeTable().getRow(thisNode.getSUID()).set("name", itemLabel);
-        }
-        System.out.println("nodeProps: " + nodeProps);
-
-        // make the type column
-        CyTable nodeTable = myNet.getDefaultNodeTable();
-        if (nodeTable.getColumn("type") == null) {
-            nodeTable.createColumn("type", String.class, true);
-        }
-
-        // Set the node properties for each node and lookup the node's type based on them
-        for (CyNode thisNode : nodeProps.keySet()) {
-            Collection<Property> props = nodeProps.get(thisNode).values();
-
-            Set<Property> itemProps = props.stream().filter(p -> "item".equals(p.getType())).collect(Collectors.toSet());
-            CyActivator.setNodeProps(thisNode, itemProps);
-
-            Set<Property> idProps = props.stream().filter(p -> "id".equals(p.getType())).collect(Collectors.toSet());
-            String type = propertiesToType(idProps);
-            myNet.getDefaultNodeTable().getRow(thisNode.getSUID()).set("type", type);
-        }
-    }
-*/
 
     private void updateNodeTable(CyNode node, String propLabel, String value) {
         CyTable nodeTable = myNet.getDefaultNodeTable();

@@ -63,8 +63,11 @@ public class TransformTask extends AbstractTask {
         if (myNet.getDefaultNodeTable().getColumn("id") == null) {
             myNet.getDefaultNodeTable().createColumn("id", String.class, true);
         }
-        if (myNet.getDefaultNodeTable().getColumn("type") == null) {
-            myNet.getDefaultNodeTable().createColumn("type", String.class, true);
+        if (myNet.getDefaultNodeTable().getColumn("instance of") == null) {
+            myNet.getDefaultNodeTable().createColumn("instance of", String.class, false);
+        }
+        if (myNet.getDefaultNodeTable().getColumn("subclass") == null) {
+            myNet.getDefaultNodeTable().createColumn("subclass", String.class, false);
         }
         newNodes = new ArrayList<>();
         nodeWdidMap = new HashMap<>();
@@ -107,7 +110,6 @@ public class TransformTask extends AbstractTask {
             nodeWdidMap.put(subject.getWdid(), subjectNode);
             myNet.getDefaultNodeTable().getRow(subjectNode.getSUID()).set("name", subject.getName());
             myNet.getDefaultNodeTable().getRow(subjectNode.getSUID()).set("wdid", subject.getWdid());
-            myNet.getDefaultNodeTable().getRow(subjectNode.getSUID()).set("type", subject.getType());
         }
         return subjectNode;
     }

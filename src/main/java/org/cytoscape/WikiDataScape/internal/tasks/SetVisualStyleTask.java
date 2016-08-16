@@ -53,7 +53,7 @@ public class SetVisualStyleTask extends AbstractTask {
         CyNetworkViewManager cnvm = adapter.getCyNetworkViewManager();
         
         for (CyNetworkView netView: cnvm.getNetworkViewSet()){
-            VisualStyle vs = visualStyleFactory.createVisualStyle(vmmServiceRef.getDefaultVisualStyle());
+            VisualStyle vs = vmmServiceRef.getCurrentVisualStyle();
             
             VisualMappingFunction<String, String> edgeLabel = vmfPassFactory.createVisualMappingFunction("interaction", String.class, BasicVisualLexicon.EDGE_LABEL);
             vs.addVisualMappingFunction(edgeLabel);
@@ -72,8 +72,8 @@ public class SetVisualStyleTask extends AbstractTask {
             vs.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.RED);
             vs.setDefaultValue(BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.ARROW);
             
-            vmmServiceRef.addVisualStyle(vs);
-            vmmServiceRef.setVisualStyle(vs, netView);
+            //vmmServiceRef.addVisualStyle(vs);
+            vmmServiceRef.setCurrentVisualStyle(vs);
         }
 
     }
