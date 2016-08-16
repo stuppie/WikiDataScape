@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1471307922570
+Bnd-LastModified: 1471309197341
 Build-Jdk: 1.8.0_91
 Built-By: gstupp
 Bundle-Activator: org.cytoscape.WikiDataScape.internal.CyActivator
@@ -16,7 +16,7 @@ Bundle-ClassPath: .,wdtk-wikibaseapi-0.6.0.jar,wdtk-datamodel-0.6.0.jar,
 Bundle-ManifestVersion: 2
 Bundle-Name: org.cytoscape.WikiDataScape.WikiDataScape
 Bundle-SymbolicName: org.cytoscape.WikiDataScape.WikiDataScape
-Bundle-Version: 1.0.2
+Bundle-Version: 1.0.3
 Created-By: Apache Maven Bundle Plugin
 Embed-Dependency: *;scope=!provided|test;groupId=!org.cytoscape
 Embed-Transitive: true
