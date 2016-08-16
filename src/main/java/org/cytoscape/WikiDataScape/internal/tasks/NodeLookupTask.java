@@ -94,6 +94,10 @@ public class NodeLookupTask extends AbstractTask {
         System.out.println("nodeWdid" + nodeWdid);
 
         doQuery(wdids, doReverse);
+        
+        TaskManager taskManager = adapter.getTaskManager();
+        SetVisualStyleTask setVisualStyleTask = new SetVisualStyleTask(myView);
+        taskManager.execute(setVisualStyleTask.createTaskIterator());
 
     }
 

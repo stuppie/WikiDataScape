@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bnd-LastModified: 1471386392114
+Bnd-LastModified: 1471391621732
 Build-Jdk: 1.8.0_91
 Built-By: gstupp
 Bundle-Activator: org.cytoscape.WikiDataScape.internal.CyActivator
@@ -16,7 +16,7 @@ Bundle-ClassPath: .,wdtk-wikibaseapi-0.6.0.jar,wdtk-datamodel-0.6.0.jar,
 Bundle-ManifestVersion: 2
 Bundle-Name: WikiDataScape
 Bundle-SymbolicName: org.cytoscape.WikiDataScape.WikiDataScape
-Bundle-Version: 1.0.3
+Bundle-Version: 1.0.4
 Created-By: Apache Maven Bundle Plugin
 Embed-Dependency: *;scope=!provided|test;groupId=!org.cytoscape
 Embed-Transitive: true
@@ -66,21 +66,19 @@ Import-Package: javax.annotation;resolution:=optional,javax.crypto;resol
  .resolver.readers;resolution:=optional,org.cytoscape.app;resolution:=op
  tional;version="[3.4,4)",org.cytoscape.application;resolution:=optional
  ,org.cytoscape.application.swing;resolution:=optional;version="[3.4,4)"
- ,org.cytoscape.event;resolution:=optional;version="[3.4,4)",org.cytosca
- pe.model;resolution:=optional;version="[3.4,4)",org.cytoscape.service.u
- til;resolution:=optional;version="[3.4,4)",org.cytoscape.session;resolu
- tion:=optional;version="[3.4,4)",org.cytoscape.view.layout;resolution:=
- optional;version="[3.4,4)",org.cytoscape.view.model;resolution:=optiona
- l;version="[3.4,4)",org.cytoscape.view.presentation.property;resolution
- :=optional;version="[3.4,4)",org.cytoscape.view.presentation.property.v
- alues;resolution:=optional;version="[3.4,4)",org.cytoscape.view.vizmap;
- resolution:=optional;version="[3.4,4)",org.cytoscape.view.vizmap.gui.ut
- il;resolution:=optional;version="[3.4,4)",org.cytoscape.view.vizmap.map
- pings;resolution:=optional;version="[3.4,4)",org.cytoscape.work;resolut
- ion:=optional;version="[3.4,4)",org.ietf.jgss;resolution:=optional,org.
- osgi.framework;resolution:=optional;version="[1.5,2)",org.slf4j;resolut
- ion:=optional;version="[1.7,2)",org.slf4j.spi;resolution:=optional;vers
- ion="[1.7,2)",org.tukaani.xz;resolution:=optional,sun.io;resolution:=op
- tional,sun.misc;resolution:=optional
+ ,org.cytoscape.model;resolution:=optional;version="[3.4,4)",org.cytosca
+ pe.service.util;resolution:=optional;version="[3.4,4)",org.cytoscape.vi
+ ew.layout;resolution:=optional;version="[3.4,4)",org.cytoscape.view.mod
+ el;resolution:=optional;version="[3.4,4)",org.cytoscape.view.presentati
+ on.property;resolution:=optional;version="[3.4,4)",org.cytoscape.view.p
+ resentation.property.values;resolution:=optional;version="[3.4,4)",org.
+ cytoscape.view.vizmap;resolution:=optional;version="[3.4,4)",org.cytosc
+ ape.view.vizmap.gui.util;resolution:=optional;version="[3.4,4)",org.cyt
+ oscape.view.vizmap.mappings;resolution:=optional;version="[3.4,4)",org.
+ cytoscape.work;resolution:=optional;version="[3.4,4)",org.ietf.jgss;res
+ olution:=optional,org.osgi.framework;resolution:=optional;version="[1.5
+ ,2)",org.slf4j;resolution:=optional;version="[1.7,2)",org.slf4j.spi;res
+ olution:=optional;version="[1.7,2)",org.tukaani.xz;resolution:=optional
+ ,sun.io;resolution:=optional,sun.misc;resolution:=optional
 Require-Capability: osgi.ee;filter:="(&(osgi.ee=JavaSE)(version=1.8))"
 Tool: Bnd-2.3.0.201405100607

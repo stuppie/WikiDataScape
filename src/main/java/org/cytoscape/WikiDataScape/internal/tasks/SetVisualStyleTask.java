@@ -2,10 +2,15 @@ package org.cytoscape.WikiDataScape.internal.tasks;
 
 import java.awt.Color;
 import java.awt.Paint;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.cytoscape.WikiDataScape.internal.CyActivator;
+import org.cytoscape.WikiDataScape.internal.RainbowColorMappingGenerator;
 import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNetworkManager;
@@ -20,6 +25,7 @@ import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
+import org.cytoscape.view.vizmap.gui.util.DiscreteMappingGenerator;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
@@ -32,9 +38,10 @@ import org.cytoscape.work.TaskMonitor;
 public class SetVisualStyleTask extends AbstractTask {
 
     private final CyNetworkView cyView;
+    //private final String column = "subclass of";
+    private final String column = "instance of";
 
     public SetVisualStyleTask(CyNetworkView cyView) {
-        System.out.println("SetVisualStyleTask init");
         this.cyView = cyView;
     }
 
@@ -52,7 +59,22 @@ public class SetVisualStyleTask extends AbstractTask {
         VisualMappingFunction<String, String> edgeLabel = vmfPassFactory.createVisualMappingFunction("interaction", String.class, BasicVisualLexicon.EDGE_LABEL);
         vs.addVisualMappingFunction(edgeLabel);
 
-        vs.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.RED);
+        DiscreteMapping nodeColor = (DiscreteMapping) vmfDiscreteFactory.createVisualMappingFunction(column, String.class, BasicVisualLexicon.NODE_FILL_COLOR);
+        
+        CyNetwork myNet = cyView.getModel();
+        CyTable nodeTable = myNet.getDefaultNodeTable();
+        HashSet<String> attributes = new HashSet<>();
+        nodeTable.getColumn(column).getValues(List.class).stream().filter((x) -> (x!=null)).forEach((x) -> {
+            attributes.addAll(x);
+        });
+        if (!attributes.isEmpty()){
+            RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
+            Map<String, Color> generateMap = d.generateMap(attributes);
+            nodeColor.putAll(generateMap);
+            vs.addVisualMappingFunction(nodeColor);
+        }
+
+        vs.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.GRAY);
         vs.setDefaultValue(BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.ARROW);
 
         vmmServiceRef.addVisualStyle(vs);
@@ -64,8 +86,23 @@ public class SetVisualStyleTask extends AbstractTask {
         CyAppAdapter adapter = CyActivator.getCyAppAdapter();
         VisualMappingFunctionFactory vmfDiscreteFactory = adapter.getVisualMappingFunctionDiscreteFactory();
         CyNetworkViewManager cnvm = adapter.getCyNetworkViewManager();
+                
+        DiscreteMapping nodeColor = (DiscreteMapping) vmfDiscreteFactory.createVisualMappingFunction(column, String.class, BasicVisualLexicon.NODE_FILL_COLOR);
         
-        // Here need to add new colors to map to new nodes
+        CyNetwork myNet = cyView.getModel();
+        CyTable nodeTable = myNet.getDefaultNodeTable();
+        HashSet<String> attributes = new HashSet<>();
+        List<List> instances = nodeTable.getColumn(column).getValues(List.class);
+        instances.stream().filter((x) -> (x!=null)).forEach((x) -> {
+            attributes.addAll(x);
+        });
+        System.out.println("attributes: " + attributes);
+        if (!attributes.isEmpty()){
+            RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
+            Map<String, Color> generateMap = d.generateMap(attributes);
+            nodeColor.putAll(generateMap);
+            vs.addVisualMappingFunction(nodeColor);
+        }
     }
 
     @Override
@@ -88,7 +125,6 @@ public class SetVisualStyleTask extends AbstractTask {
     }
 
     public TaskIterator createTaskIterator() {
-        System.out.println("createTaskIterator");
         return new TaskIterator(new SetVisualStyleTask(cyView));
     }
 }

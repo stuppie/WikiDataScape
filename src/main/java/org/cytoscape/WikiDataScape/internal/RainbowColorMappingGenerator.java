@@ -7,8 +7,10 @@ import java.util.Set;
 
 import org.cytoscape.view.vizmap.gui.util.DiscreteMappingGenerator;
 
+// https://github.com/svn2github/cytoscape/tree/master/core3/vizmap-gui-impl/branches/vp-tree/src/main/java/org/cytoscape/view/vizmap/gui/internal/util/mapgenerator
 public class RainbowColorMappingGenerator implements DiscreteMappingGenerator<Color> {
 
+    @Override
     public <T> Map<T, Color> generateMap(Set<T> attributeSet) {
         // Error check
         if (attributeSet == null || attributeSet.isEmpty()) {
