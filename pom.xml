@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.WikiDataScape</groupId>
     <artifactId>WikiDataScape</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <name>WikiDataScape</name>
     <packaging>bundle</packaging>
@@ -83,6 +83,27 @@
                         <Import-Package>*;resolution:=optional</Import-Package>
                     </instructions>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.apache.xerces</pattern>
+                                    <shadedPattern>org.shaded.apache.xerces</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -64,14 +64,17 @@ public class SetVisualStyleTask extends AbstractTask {
         CyNetwork myNet = cyView.getModel();
         CyTable nodeTable = myNet.getDefaultNodeTable();
         HashSet<String> attributes = new HashSet<>();
-        nodeTable.getColumn(column).getValues(List.class).stream().filter((x) -> (x!=null)).forEach((x) -> {
-            attributes.addAll(x);
-        });
-        if (!attributes.isEmpty()){
-            RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
-            Map<String, Color> generateMap = d.generateMap(attributes);
-            nodeColor.putAll(generateMap);
-            vs.addVisualMappingFunction(nodeColor);
+
+        if (nodeTable.getColumn(column) != null){
+            nodeTable.getColumn(column).getValues(List.class).stream().filter((x) -> (x!=null)).forEach((x) -> {
+                attributes.addAll(x);
+            });
+            if (!attributes.isEmpty()){
+                RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
+                Map<String, Color> generateMap = d.generateMap(attributes);
+                nodeColor.putAll(generateMap);
+                vs.addVisualMappingFunction(nodeColor);
+            }
         }
 
         vs.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.GRAY);
@@ -92,16 +95,19 @@ public class SetVisualStyleTask extends AbstractTask {
         CyNetwork myNet = cyView.getModel();
         CyTable nodeTable = myNet.getDefaultNodeTable();
         HashSet<String> attributes = new HashSet<>();
-        List<List> instances = nodeTable.getColumn(column).getValues(List.class);
-        instances.stream().filter((x) -> (x!=null)).forEach((x) -> {
-            attributes.addAll(x);
-        });
-        System.out.println("attributes: " + attributes);
-        if (!attributes.isEmpty()){
-            RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
-            Map<String, Color> generateMap = d.generateMap(attributes);
-            nodeColor.putAll(generateMap);
-            vs.addVisualMappingFunction(nodeColor);
+        
+        if (nodeTable.getColumn(column) != null){
+            List<List> instances = nodeTable.getColumn(column).getValues(List.class);
+            instances.stream().filter((x) -> (x!=null)).forEach((x) -> {
+                attributes.addAll(x);
+            });
+            System.out.println("attributes: " + attributes);
+            if (!attributes.isEmpty()){
+                RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
+                Map<String, Color> generateMap = d.generateMap(attributes);
+                nodeColor.putAll(generateMap);
+                vs.addVisualMappingFunction(nodeColor);
+            }
         }
     }
 
