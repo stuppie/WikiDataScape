@@ -2,6 +2,8 @@ package org.cytoscape.WikiDataScape.internal;
 
 import org.cytoscape.WikiDataScape.internal.model.Property;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -46,20 +48,23 @@ public class NodePropQueryContextMenuFactory implements CyNodeViewContextMenuFac
         CyNetwork myNet = this.netView.getModel();
         JMenu root = new JMenu("Properties");
         List<CyNode> nodes = CyTableUtil.getNodesInState(myNet, "selected", true);
-        
+
         // populate the submenu with known properties for these nodes
         JMenuItem menuItem;
         subjects = new HashSet<>();
-        for (CyNode node : nodes){
+        for (CyNode node : nodes) {
             String nodeName = myNet.getDefaultNodeTable().getRow(node.getSUID()).get("name", String.class);
             String nodeWdid = myNet.getDefaultNodeTable().getRow(node.getSUID()).get("wdid", String.class);
             subjects.add(new Item(nodeName, nodeWdid));
         }
         Counter subjectProperties = CyActivator.triples.getSubjectProperties(subjects);
         System.out.println("subjectProperties: " + subjectProperties);
-        
-        for (Object propObj : subjectProperties) {
-            Property prop = (Property)propObj;
+
+        // Alphabetize this list of properties
+        ArrayList<Property> propList = subjectProperties.toList();
+        Collections.sort(propList);
+
+        for (Property prop : propList) {
             int count = subjectProperties.count(prop);
             menuItem = new JMenuItem(prop.getName(count));
             menuItem.addActionListener((ActionEvent e) -> {
@@ -75,10 +80,9 @@ public class NodePropQueryContextMenuFactory implements CyNodeViewContextMenuFac
         System.out.println("-----------clickedProp-----------");
         CyNetwork myNet = this.netView.getModel();
         List<CyNode> nodes = CyTableUtil.getNodesInState(myNet, "selected", true);
-        
+
         //PropQueryTask propQueryTask = new PropQueryTask(nodes, prop);
         //taskManager.execute(propQueryTask.createTaskIterator());
-        
         // We can do they query using our stored triples! Don't need to do another sparql query!
         Triples subjectTriples = CyActivator.triples.getSubjectTriples(subjects);
         Triples triplesWithProperty = subjectTriples.getTriplesWithProperty(prop);

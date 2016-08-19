@@ -1,4 +1,4 @@
-original*.jar
+*.jar
 *.ignore
 *ItemListLookupGUI*
 *ItemLookupGUI*

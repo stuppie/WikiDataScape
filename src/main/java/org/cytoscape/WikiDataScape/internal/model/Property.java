@@ -1,11 +1,11 @@
-
 package org.cytoscape.WikiDataScape.internal.model;
 
 /**
  * Represents a wikidata property
+ *
  * @author gstupp
  */
-public class Property {
+public class Property implements Comparable {
 
     private String name = null; // ex: "KEGG ID"
     private String id = null; // ex: "P665"
@@ -16,30 +16,34 @@ public class Property {
         this.id = id;
         this.type = type;
     }
-    
-    public String getID(){
+
+    public String getID() {
         return this.id;
     }
+
     public String getName() {
         return this.name;
     }
+
     public String getName(Integer count) {
-        return this.name + " (" +   count + ")";
+        return this.name + " (" + count + ")";
     }
+
     public String getType() {
         return this.type;
     }
-    
+
     @Override
     public String toString() {
         return "<" + this.name + " (" + this.id + ")" + ">";
     }
-/*    
+
+    /*    
     @Override
     public String toString() {
         return "<" + this.name + " (" + this.id + "): " + this.count + ">";
     }
-*/
+     */
     @Override
     public boolean equals(Object otherObject) {
         // check for reference equality.
@@ -59,6 +63,11 @@ public class Property {
         int hash = this.id.hashCode();
         // hash = hash * 31 + this.id.hashCode();
         return hash;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return (this.getName().compareToIgnoreCase(((Property) o).getName()));
     }
 
 }

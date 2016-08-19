@@ -4,6 +4,8 @@ import org.cytoscape.WikiDataScape.internal.model.Property;
 import org.cytoscape.WikiDataScape.internal.tasks.NodeLookupTask;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -13,14 +15,10 @@ import org.cytoscape.WikiDataScape.internal.model.Counter;
 import org.cytoscape.WikiDataScape.internal.model.Item;
 import org.cytoscape.WikiDataScape.internal.model.Triples;
 import org.cytoscape.WikiDataScape.internal.tasks.TransformTask;
-import org.cytoscape.application.CyApplicationManager;
 
 import org.cytoscape.application.swing.CyMenuItem;
 import org.cytoscape.application.swing.CyNodeViewContextMenuFactory;
-import org.cytoscape.event.CyEventHelper;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 import org.cytoscape.view.model.CyNetworkView;
@@ -76,9 +74,12 @@ public class NodeInversePropQueryContextMenuFactory implements CyNodeViewContext
         }
         Counter objectsProperties = CyActivator.triples.getObjectProperties(objects);
         System.out.println("objectsProperties: " + objectsProperties);
+        
+        // Alphabetize this list of properties
+        ArrayList<Property> propList = objectsProperties.toList();
+        Collections.sort(propList);
 
-        for (Object propObj : objectsProperties) {
-            Property prop = (Property) propObj;
+        for (Property prop : propList) {
             int count = objectsProperties.count(prop);
             menuItem = new JMenuItem(prop.getName(count));
             menuItem.addActionListener((ActionEvent e) -> {

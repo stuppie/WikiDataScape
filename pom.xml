@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.cytoscape.WikiDataScape</groupId>
     <artifactId>WikiDataScape</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 
     <name>WikiDataScape</name>
     <packaging>bundle</packaging>

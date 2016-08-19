@@ -60,7 +60,7 @@ public class CyActivator extends AbstractCyActivator {
         lookupNodeViewContextMenuFactoryProps.put("preferredMenu", "WikiData");
         lookupNodeViewContextMenuFactoryProps.setProperty("title", "wikidata title");
         registerAllServices(bc, lookupNodeViewContextMenuFactory, lookupNodeViewContextMenuFactoryProps);
-
+        
         // Right click menu (node). Props
         CyNodeViewContextMenuFactory propNodeViewContextMenuFactory = new NodePropQueryContextMenuFactory(taskManager);
         Properties propNodeViewContextMenuFactoryProps = new Properties();

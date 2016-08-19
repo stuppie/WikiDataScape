@@ -1,8 +1,10 @@
 package org.cytoscape.WikiDataScape.internal.model;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -27,6 +29,10 @@ public class Counter<T> implements Iterable<T>{
     @Override
     public Iterator<T> iterator() {
         return counts.keySet().iterator();
+    }
+    
+    public ArrayList<T> toList() {
+        return new ArrayList<T>(counts.keySet());
     }
 
 }
