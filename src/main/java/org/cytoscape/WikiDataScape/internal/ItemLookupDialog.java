@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -136,11 +137,10 @@ public class ItemLookupDialog extends javax.swing.JFrame {
     // https://www.wikidata.org/w/api.php?action=wbsearchentities&search=indole&language=en
     private void doSearch(String text) throws MalformedURLException, IOException {
         String sURL = "https://www.wikidata.org/w/api.php?action=wbsearchentities&search=%s&language=en&format=json";
-        sURL = String.format(sURL, text);
-        System.out.println("sURL: " + sURL);
+        sURL = String.format(sURL, URLEncoder.encode(text, "UTF-8"));
 
-        // Connect to the URL using java's native library
         URL url = new URL(sURL);
+        System.out.println("url: " + url);
         HttpURLConnection request = (HttpURLConnection) url.openConnection();
         request.connect();
 

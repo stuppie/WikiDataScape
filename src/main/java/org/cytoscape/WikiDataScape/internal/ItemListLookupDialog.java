@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -183,7 +184,7 @@ public class ItemListLookupDialog extends javax.swing.JFrame {
         Map<String, SearchResult> searchResults = new HashMap<>();
 
         String sURL = "https://www.wikidata.org/w/api.php?action=wbsearchentities&search=%s&language=en&format=json&type=property";
-        sURL = String.format(sURL, text);
+        sURL = String.format(sURL, URLEncoder.encode(text, "UTF-8"));
         System.out.println("sURL: " + sURL);
 
         // Connect to the URL using java's native library
