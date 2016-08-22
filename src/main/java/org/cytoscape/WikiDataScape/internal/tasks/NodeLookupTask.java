@@ -24,8 +24,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import java.util.Iterator;
 import java.util.stream.Collectors;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.engine.http.HttpQuery;
+import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.cytoscape.WikiDataScape.internal.CyActivator;
 import org.cytoscape.WikiDataScape.internal.model.Item;
 import org.cytoscape.WikiDataScape.internal.model.Property;
@@ -117,9 +121,11 @@ public class NodeLookupTask extends AbstractTask {
                 + "}";
 
         System.out.println(queryString);
-        Query query = QueryFactory.create(queryString);
-        QueryExecution qexec = QueryExecutionFactory.sparqlService("https://query.wikidata.org/sparql", queryString);
-        ResultSet results = qexec.execSelect();
+        HttpQuery.urlLimit = 4000;
+        Query query = QueryFactory.create(queryString, Syntax.syntaxSPARQL);
+        QueryEngineHTTP qeh = new QueryEngineHTTP("https://query.wikidata.org/sparql", query);
+        ResultSet results = qeh.execSelect();
+        
         //ResultSetFormatter.out(System.out, results, query);
         
         Triples triples = new Triples();
