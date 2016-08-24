@@ -1,31 +1,26 @@
 package org.cytoscape.WikiDataScape.internal.tasks;
 
 import java.awt.Color;
-import java.awt.Paint;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.cytoscape.WikiDataScape.internal.CyActivator;
-import org.cytoscape.WikiDataScape.internal.RainbowColorMappingGenerator;
+import org.cytoscape.WikiDataScape.internal.RandomColorMappingGenerator;
 import org.cytoscape.app.CyAppAdapter;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.presentation.property.ArrowShapeVisualProperty;
+import org.cytoscape.view.presentation.property.LineTypeVisualProperty;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
 import org.cytoscape.view.vizmap.VisualMappingFunction;
 import org.cytoscape.view.vizmap.VisualMappingFunctionFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualPropertyDependency;
 import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.view.vizmap.VisualStyleFactory;
-import org.cytoscape.view.vizmap.gui.util.DiscreteMappingGenerator;
 import org.cytoscape.view.vizmap.mappings.DiscreteMapping;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.TaskIterator;
@@ -54,60 +49,107 @@ public class SetVisualStyleTask extends AbstractTask {
         VisualMappingFunctionFactory vmfPassFactory = adapter.getVisualMappingFunctionPassthroughFactory();
 
         VisualStyle vs = visualStyleFactory.createVisualStyle(vmmServiceRef.getDefaultVisualStyle());
+        /*
+        VisualStyle base = vmmServiceRef.getAllVisualStyles().stream().filter(x -> x.getTitle().equals("Marquee")).findFirst().get();
+        VisualStyle vs = visualStyleFactory.createVisualStyle(base);
+        */
         vs.setTitle("WikiDataScape");
 
+        // edge label: passthrough "interaction" column
         VisualMappingFunction<String, String> edgeLabel = vmfPassFactory.createVisualMappingFunction("interaction", String.class, BasicVisualLexicon.EDGE_LABEL);
         vs.addVisualMappingFunction(edgeLabel);
 
+        // node face color mapping: discrete "instance of" random color
         DiscreteMapping nodeColor = (DiscreteMapping) vmfDiscreteFactory.createVisualMappingFunction(column, String.class, BasicVisualLexicon.NODE_FILL_COLOR);
-        
         CyNetwork myNet = cyView.getModel();
         CyTable nodeTable = myNet.getDefaultNodeTable();
         HashSet<String> attributes = new HashSet<>();
-
-        if (nodeTable.getColumn(column) != null){
-            nodeTable.getColumn(column).getValues(List.class).stream().filter((x) -> (x!=null)).forEach((x) -> {
+        if (nodeTable.getColumn(column) != null) {
+            nodeTable.getColumn(column).getValues(List.class).stream().filter((x) -> (x != null)).forEach((x) -> {
                 attributes.addAll(x);
             });
-            if (!attributes.isEmpty()){
-                RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
+            if (!attributes.isEmpty()) {
+                RandomColorMappingGenerator d = new RandomColorMappingGenerator();
                 Map<String, Color> generateMap = d.generateMap(attributes);
                 nodeColor.putAll(generateMap);
-                vs.addVisualMappingFunction(nodeColor);
             }
         }
+        nodeColor.putMapValue("", Color.GRAY);
+        vs.addVisualMappingFunction(nodeColor);
+
+        // edge stroke color: discrete mapping to "instance of" random color
+        DiscreteMapping edgeColor = (DiscreteMapping) vmfDiscreteFactory.createVisualMappingFunction("interaction", String.class, BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
+        CyTable edgeTable = myNet.getDefaultEdgeTable();
+        HashSet<String> interactions = new HashSet<>(edgeTable.getColumn("interaction").getValues(String.class));
+        if (!interactions.isEmpty()) {
+            RandomColorMappingGenerator d = new RandomColorMappingGenerator();
+            Map<String, Color> generateMap = d.generateMap(interactions);
+            edgeColor.putAll(generateMap);
+        }
+        edgeColor.putMapValue("", Color.black);
+        vs.addVisualMappingFunction(edgeColor);
+
+        // edge line type mapping a couple major edge types
+        DiscreteMapping edgeLineType = (DiscreteMapping) vmfDiscreteFactory.createVisualMappingFunction("interaction", String.class, BasicVisualLexicon.EDGE_LINE_TYPE);
+        edgeLineType.putMapValue("subclass of", LineTypeVisualProperty.DASH_DOT);
+        edgeLineType.putMapValue("instance of", LineTypeVisualProperty.DOT);
+        edgeLineType.putMapValue("has part", LineTypeVisualProperty.EQUAL_DASH);
+        vs.addVisualMappingFunction(edgeLineType);
 
         vs.setDefaultValue(BasicVisualLexicon.NODE_FILL_COLOR, Color.GRAY);
         vs.setDefaultValue(BasicVisualLexicon.EDGE_TARGET_ARROW_SHAPE, ArrowShapeVisualProperty.ARROW);
+        
+        // Enable "Custom Graphics fit to Node" and "Edge color to arrows" dependency
+        // Also disable "Lock Node height and width"
+        // copied from here, because this isn't documented anywhere
+        // https://github.com/idekerlab/dot-app/blob/24e308b9f869abf0e7007f6a508c99e99ebec52d/src/main/java/org/cytoscape/intern/read/DotReaderTask.java
+        for (VisualPropertyDependency<?> dep : vs.getAllVisualPropertyDependencies()) {
+            if (dep.getIdString().equals("nodeCustomGraphicsSizeSync")
+                    || dep.getIdString().equals("arrowColorMatchesEdge")) {
+                dep.setDependency(true);
+            } else if (dep.getIdString().equals("nodeSizeLocked")) {
+                dep.setDependency(false);
+            }
+
+        }
 
         vmmServiceRef.addVisualStyle(vs);
 
         return vs;
     }
-    
-    private void updateVisualStyle(VisualStyle vs){
-        CyAppAdapter adapter = CyActivator.getCyAppAdapter();
-        VisualMappingFunctionFactory vmfDiscreteFactory = adapter.getVisualMappingFunctionDiscreteFactory();
-        CyNetworkViewManager cnvm = adapter.getCyNetworkViewManager();
-                
-        DiscreteMapping nodeColor = (DiscreteMapping) vmfDiscreteFactory.createVisualMappingFunction(column, String.class, BasicVisualLexicon.NODE_FILL_COLOR);
-        
+
+    private void updateVisualStyle(VisualStyle vs) {
+
+        // update node face color
+        DiscreteMapping nodeColor = (DiscreteMapping) vs.getVisualMappingFunction(BasicVisualLexicon.NODE_FILL_COLOR);
         CyNetwork myNet = cyView.getModel();
         CyTable nodeTable = myNet.getDefaultNodeTable();
         HashSet<String> attributes = new HashSet<>();
-        
-        if (nodeTable.getColumn(column) != null){
+        if (nodeTable.getColumn(column) != null) {
             List<List> instances = nodeTable.getColumn(column).getValues(List.class);
-            instances.stream().filter((x) -> (x!=null)).forEach((x) -> {
+            instances.stream().filter((x) -> (x != null)).forEach((x) -> {
                 attributes.addAll(x);
             });
-            System.out.println("attributes: " + attributes);
-            if (!attributes.isEmpty()){
-                RainbowColorMappingGenerator d = new RainbowColorMappingGenerator();
+            if (!attributes.isEmpty()) {
+                Map currentMap = nodeColor.getAll();
+                RandomColorMappingGenerator d = new RandomColorMappingGenerator();
                 Map<String, Color> generateMap = d.generateMap(attributes);
+                generateMap.putAll(currentMap);
                 nodeColor.putAll(generateMap);
-                vs.addVisualMappingFunction(nodeColor);
             }
+        }
+
+        // update edge stroke color
+        DiscreteMapping edgeColor = (DiscreteMapping) vs.getVisualMappingFunction(BasicVisualLexicon.EDGE_UNSELECTED_PAINT);
+        CyTable edgeTable = myNet.getDefaultEdgeTable();
+        HashSet<String> interactions = new HashSet<>(edgeTable.getColumn("interaction").getValues(String.class));
+        if (!interactions.isEmpty()) {
+            // This reuses the same colors
+            Map currentMap = edgeColor.getAll();
+            RandomColorMappingGenerator d = new RandomColorMappingGenerator();
+            Map<String, Color> generateMap = d.generateMap(interactions);
+            generateMap.putAll(currentMap);
+            edgeColor.putAll(generateMap);
         }
     }
 
